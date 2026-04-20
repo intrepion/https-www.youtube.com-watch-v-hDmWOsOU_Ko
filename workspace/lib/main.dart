@@ -66,7 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    print('rx: $_rx, ry: $_ry, rz: $_rz');
     return GestureDetector(
       onPanUpdate: (details) {
         _rx += details.delta.dx * 0.01;
@@ -125,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Cube extends StatelessWidget {
-  const Cube({Key? key}) : super(key: key);
+  const Cube({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +133,7 @@ class Cube extends StatelessWidget {
         Transform(
           // STARBOARD
           transform: Matrix4.identity()
-            ..translate(100.0, 0.0, 0.0)
+            ..translateByDouble(100.0, 0.0, 0.0, 1.0)
             ..rotateY(-pi / 2),
           alignment: Alignment.center,
           child: Container(
@@ -147,7 +146,7 @@ class Cube extends StatelessWidget {
         Transform(
           // FRONT
           transform: Matrix4.identity()
-            ..translate(0.0, 0.0, -100.0)
+            ..translateByDouble(0.0, 0.0, -100.0, 1.0)
             ..rotateY(0),
           alignment: Alignment.center,
           child: Container(
@@ -160,7 +159,7 @@ class Cube extends StatelessWidget {
         Transform(
           // PORT
           transform: Matrix4.identity()
-            ..translate(-100.0, 0.0, 0.0)
+            ..translateByDouble(-100.0, 0.0, 0.0, 1.0)
             ..rotateY(pi / 2),
           alignment: Alignment.center,
           child: Container(
@@ -173,7 +172,7 @@ class Cube extends StatelessWidget {
         Transform(
           // BACK
           transform: Matrix4.identity()
-            ..translate(0.0, 0.0, 100.0)
+            ..translateByDouble(0.0, 0.0, 100.0, 1.0)
             ..rotateY(pi),
           alignment: Alignment.center,
           child: Container(
@@ -186,7 +185,7 @@ class Cube extends StatelessWidget {
         Transform(
           // BOTTOM
           transform: Matrix4.identity()
-            ..translate(0.0, 200.0, 0.0)
+            ..translateByDouble(0.0, 200.0, 0.0, 1.0)
             ..rotateX(pi / 2),
           alignment: Alignment.center,
           child: Container(
@@ -199,11 +198,11 @@ class Cube extends StatelessWidget {
         Transform(
           // TOP
           transform: Matrix4.identity()
-            ..translate(0.0, -100.0, 0.0)
+            ..translateByDouble(0.0, -100.0, 0.0, 1.0)
             ..rotateX(-pi / 2),
           alignment: Alignment.center,
           child: Container(
-            color: Colors.pink.withOpacity(0.8),
+            color: Colors.pink.withValues(alpha: 0.8),
             width: 200,
             height: 200,
             child: FlutterLogo(size: 200),
