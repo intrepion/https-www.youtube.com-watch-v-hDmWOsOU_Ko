@@ -1,6 +1,46 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+
+const _boxAssetPath = 'assets/box0001.png';
+const _tallFaceSize = Size(200, 300);
+const _squareFaceSize = Size(200, 200);
+
+// Normalized crop rectangles for each face.
+// Values are percentages of box0001.png and can be tuned to pick exact areas.
+const _cubeFaceSpecs = <CubeFaceSpec>[
+  CubeFaceSpec(
+    label: 'starboard',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.02, 0.00, 0.15, 0.32),
+  ),
+  CubeFaceSpec(
+    label: 'front',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.19, 0.28, 0.15, 0.32),
+  ),
+  CubeFaceSpec(
+    label: 'port',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.38, 0.22, 0.15, 0.32),
+  ),
+  CubeFaceSpec(
+    label: 'back',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.68, 0.27, 0.15, 0.32),
+  ),
+  CubeFaceSpec(
+    label: 'bottom',
+    size: _squareFaceSize,
+    crop: Rect.fromLTWH(0.40, 0.06, 0.14, 0.20),
+  ),
+  CubeFaceSpec(
+    label: 'top',
+    size: _squareFaceSize,
+    crop: Rect.fromLTWH(0.38, 0.74, 0.14, 0.20),
+  ),
+];
 
 void main() {
   runApp(const MyApp());
@@ -123,11 +163,71 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Cube extends StatelessWidget {
+class CubeFaceSpec {
+  const CubeFaceSpec({
+    required this.label,
+    required this.size,
+    required this.crop,
+  });
+
+  final String label;
+  final Size size;
+  final Rect crop;
+}
+
+class Cube extends StatefulWidget {
   const Cube({super.key});
 
   @override
+  State<Cube> createState() => _CubeState();
+}
+
+class _CubeState extends State<Cube> {
+  ui.Image? _boxImage;
+  ImageStream? _imageStream;
+  late final ImageStreamListener _imageListener = ImageStreamListener((
+    imageInfo,
+    _,
+  ) {
+    if (!mounted) return;
+    setState(() => _boxImage = imageInfo.image);
+  });
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveBoxImage();
+  }
+
+  void _resolveBoxImage() {
+    final stream = AssetImage(
+      _boxAssetPath,
+    ).resolve(createLocalImageConfiguration(context));
+
+    if (_imageStream?.key == stream.key) return;
+
+    _imageStream?.removeListener(_imageListener);
+    _imageStream = stream..addListener(_imageListener);
+  }
+
+  @override
+  void dispose() {
+    _imageStream?.removeListener(_imageListener);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final boxImage = _boxImage;
+
+    if (boxImage == null) {
+      return const SizedBox(
+        width: 200,
+        height: 300,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Stack(
       children: [
         Transform(
@@ -136,12 +236,7 @@ class Cube extends StatelessWidget {
             ..translateByDouble(100.0, 0.0, 0.0, 1.0)
             ..rotateY(-pi / 2),
           alignment: Alignment.center,
-          child: Container(
-            color: Colors.orange,
-            width: 200,
-            height: 300,
-            child: FlutterLogo(size: 200),
-          ),
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[0]),
         ),
         Transform(
           // FRONT
@@ -149,12 +244,7 @@ class Cube extends StatelessWidget {
             ..translateByDouble(0.0, 0.0, -100.0, 1.0)
             ..rotateY(0),
           alignment: Alignment.center,
-          child: Container(
-            color: Colors.red,
-            width: 200,
-            height: 300,
-            child: FlutterLogo(size: 200),
-          ),
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[1]),
         ),
         Transform(
           // PORT
@@ -162,12 +252,7 @@ class Cube extends StatelessWidget {
             ..translateByDouble(-100.0, 0.0, 0.0, 1.0)
             ..rotateY(pi / 2),
           alignment: Alignment.center,
-          child: Container(
-            color: Colors.purple,
-            width: 200,
-            height: 300,
-            child: FlutterLogo(size: 200),
-          ),
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[2]),
         ),
         Transform(
           // BACK
@@ -175,12 +260,7 @@ class Cube extends StatelessWidget {
             ..translateByDouble(0.0, 0.0, 100.0, 1.0)
             ..rotateY(pi),
           alignment: Alignment.center,
-          child: Container(
-            color: Colors.black,
-            width: 200,
-            height: 300,
-            child: FlutterLogo(size: 200),
-          ),
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[3]),
         ),
         Transform(
           // BOTTOM
@@ -188,12 +268,7 @@ class Cube extends StatelessWidget {
             ..translateByDouble(0.0, 200.0, 0.0, 1.0)
             ..rotateX(pi / 2),
           alignment: Alignment.center,
-          child: Container(
-            color: Colors.blue,
-            width: 200,
-            height: 200,
-            child: FlutterLogo(size: 200),
-          ),
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[4]),
         ),
         Transform(
           // TOP
@@ -201,14 +276,75 @@ class Cube extends StatelessWidget {
             ..translateByDouble(0.0, -100.0, 0.0, 1.0)
             ..rotateX(-pi / 2),
           alignment: Alignment.center,
-          child: Container(
-            color: Colors.pink.withValues(alpha: 0.8),
-            width: 200,
-            height: 200,
-            child: FlutterLogo(size: 200),
-          ),
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[5]),
         ),
       ],
     );
+  }
+}
+
+class CubeFace extends StatelessWidget {
+  const CubeFace({
+    super.key,
+    required this.image,
+    required this.spec,
+  });
+
+  final ui.Image image;
+  final CubeFaceSpec spec;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: spec.size.width,
+      height: spec.size.height,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.18),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: CustomPaint(
+        size: spec.size,
+        painter: _CubeFacePainter(image: image, crop: spec.crop),
+      ),
+    );
+  }
+}
+
+class _CubeFacePainter extends CustomPainter {
+  const _CubeFacePainter({
+    required this.image,
+    required this.crop,
+  });
+
+  final ui.Image image;
+  final Rect crop;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final sourceRect = Rect.fromLTWH(
+      crop.left * image.width,
+      crop.top * image.height,
+      crop.width * image.width,
+      crop.height * image.height,
+    );
+
+    canvas.drawImageRect(
+      image,
+      sourceRect,
+      Offset.zero & size,
+      Paint()..filterQuality = FilterQuality.high,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CubeFacePainter oldDelegate) {
+    return oldDelegate.image != image || oldDelegate.crop != crop;
   }
 }
