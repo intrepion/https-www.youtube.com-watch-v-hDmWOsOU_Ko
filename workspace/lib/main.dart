@@ -225,7 +225,8 @@ class _RectangularPrismState extends State<RectangularPrism> {
   @override
   Widget build(BuildContext context) {
     final boxImage = _boxImage;
-    final halfWidth = _tallFaceSize.width / 2;
+    final halfWidth = _squareFaceSize.width / 2;
+    final halfDepth = _squareFaceSize.height / 2;
     final halfHeight = _tallFaceSize.height / 2;
 
     if (boxImage == null) {
@@ -245,6 +246,7 @@ class _RectangularPrismState extends State<RectangularPrism> {
       boxImage: boxImage,
       cubeTransform: cubeTransform,
       halfWidth: halfWidth,
+      halfDepth: halfDepth,
       halfHeight: halfHeight,
     );
 
@@ -263,6 +265,7 @@ class _RectangularPrismState extends State<RectangularPrism> {
     required ui.Image boxImage,
     required Matrix4 cubeTransform,
     required double halfWidth,
+    required double halfDepth,
     required double halfHeight,
   }) {
     final faces = <_VisiblePrismFace>[];
@@ -289,7 +292,7 @@ class _RectangularPrismState extends State<RectangularPrism> {
       _PrismFacePlacement(
         label: 'stem',
         transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, -halfWidth, 1.0),
+          ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
       ),
       _PrismFacePlacement(
         label: 'port',
@@ -300,7 +303,7 @@ class _RectangularPrismState extends State<RectangularPrism> {
       _PrismFacePlacement(
         label: 'stern',
         transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, halfWidth, 1.0)
+          ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
           ..rotateY(pi),
       ),
     ]) {
@@ -369,13 +372,6 @@ class CubeFace extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.18),
-            blurRadius: 10,
-            offset: Offset(0, 3),
-          ),
-        ],
       ),
       child: CustomPaint(
         size: spec.size,
