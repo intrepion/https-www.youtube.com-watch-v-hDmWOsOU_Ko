@@ -101,12 +101,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double _rx = 0.0, _ry = 0.0, _rz = 0.0;
+  double _rx = 0.0, _ry = 0.0, _rz = 0.0, _zoom = 1.0;
 
   String _formatAngle(double radians) {
     final degrees = radians * 180 / pi;
     return '${radians.toStringAsFixed(2)} rad (${degrees.toStringAsFixed(1)} deg)';
   }
+
+  String _formatZoom(double zoom) => '${zoom.toStringAsFixed(2)}x';
 
   Widget _angleControl({
     required String axis,
@@ -156,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
-              child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz),
+              child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz, zoom: _zoom),
             ),
             const SizedBox(height: 32),
             _angleControl(
@@ -173,6 +175,21 @@ class _MyHomePageState extends State<MyHomePage> {
               axis: 'Z',
               value: _rz,
               onChanged: (value) => setState(() => _rz = value),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Zoom: ${_formatZoom(_zoom)}'),
+                  Slider(
+                    value: _zoom,
+                    min: 0.4,
+                    max: 2.5,
+                    onChanged: (value) => setState(() => _zoom = value),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -199,11 +216,13 @@ class RectangularPrism extends StatefulWidget {
     required this.rx,
     required this.ry,
     required this.rz,
+    required this.zoom,
   });
 
   final double rx;
   final double ry;
   final double rz;
+  final double zoom;
 
   @override
   State<RectangularPrism> createState() => _RectangularPrismState();
@@ -275,16 +294,19 @@ class _RectangularPrismState extends State<RectangularPrism> {
     return Transform(
       transform: prismTransform,
       alignment: Alignment.center,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: orderedFaces.map((face) {
-          return Transform(
-            transform: face.transform,
-            alignment: Alignment.center,
-            child: face.child,
-          );
-        }).toList(),
+      child: Transform.scale(
+        scale: widget.zoom,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: orderedFaces.map((face) {
+            return Transform(
+              transform: face.transform,
+              alignment: Alignment.center,
+              child: face.child,
+            );
+          }).toList(),
+        ),
       ),
     );
   }
