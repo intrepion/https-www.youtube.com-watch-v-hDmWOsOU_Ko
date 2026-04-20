@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' as vm;
 
 const _boxAssetPath = 'assets/box0001.png';
 const _tallFaceSize = Size(165, 178);
@@ -11,12 +12,12 @@ const _squareFaceSize = Size(165, 165);
 // Values are percentages of box0001.png and can be tuned to pick exact areas.
 const _cubeFaceSpecs = <CubeFaceSpec>[
   CubeFaceSpec(
-    label: 'bottom',
+    label: 'keel',
     size: _squareFaceSize,
     crop: Rect.fromLTWH(0.03, 0.15, 0.22, 0.22),
   ),
   CubeFaceSpec(
-    label: 'top',
+    label: 'deck',
     size: _squareFaceSize,
     crop: Rect.fromLTWH(0.27, 0.15, 0.22, 0.22),
   ),
@@ -26,7 +27,7 @@ const _cubeFaceSpecs = <CubeFaceSpec>[
     crop: Rect.fromLTWH(0.04, 0.41, 0.22, 0.33),
   ),
   CubeFaceSpec(
-    label: 'front',
+    label: 'stem',
     size: _tallFaceSize,
     crop: Rect.fromLTWH(0.27, 0.41, 0.22, 0.33),
   ),
@@ -36,7 +37,7 @@ const _cubeFaceSpecs = <CubeFaceSpec>[
     crop: Rect.fromLTWH(0.48, 0.41, 0.22, 0.33),
   ),
   CubeFaceSpec(
-    label: 'back',
+    label: 'stern',
     size: _tallFaceSize,
     crop: Rect.fromLTWH(0.71, 0.41, 0.22, 0.33),
   ),
@@ -132,15 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Transform(
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.005)
-                ..rotateX(_rx)
-                ..rotateY(_ry)
-                ..rotateZ(_rz),
-              alignment: Alignment.center,
-              child: Center(child: Cube()),
-            ),
+            Center(child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz)),
             const SizedBox(height: 32),
             Slider(
               value: _rx,
@@ -179,14 +172,23 @@ class CubeFaceSpec {
   final Rect crop;
 }
 
-class Cube extends StatefulWidget {
-  const Cube({super.key});
+class RectangularPrism extends StatefulWidget {
+  const RectangularPrism({
+    super.key,
+    required this.rx,
+    required this.ry,
+    required this.rz,
+  });
+
+  final double rx;
+  final double ry;
+  final double rz;
 
   @override
-  State<Cube> createState() => _CubeState();
+  State<RectangularPrism> createState() => _RectangularPrismState();
 }
 
-class _CubeState extends State<Cube> {
+class _RectangularPrismState extends State<RectangularPrism> {
   ui.Image? _boxImage;
   ImageStream? _imageStream;
   late final ImageStreamListener _imageListener = ImageStreamListener((
@@ -223,6 +225,8 @@ class _CubeState extends State<Cube> {
   @override
   Widget build(BuildContext context) {
     final boxImage = _boxImage;
+    final halfWidth = _tallFaceSize.width / 2;
+    final halfHeight = _tallFaceSize.height / 2;
 
     if (boxImage == null) {
       return const SizedBox(
@@ -232,59 +236,93 @@ class _CubeState extends State<Cube> {
       );
     }
 
-    return Stack(
-      children: [
-        Transform(
-          // BOTTOM
-          transform: Matrix4.identity()
-            ..translateByDouble(0.0, (_tallFaceSize.height / 2), 0.0, 1.0)
-            ..rotateX(pi / 2),
-          alignment: Alignment.center,
-          child: _buildFace(boxImage, 'bottom'),
-        ),
-        Transform(
-          // TOP
-          transform: Matrix4.identity()
-            ..translateByDouble(0.0, -(_tallFaceSize.height / 2), 0.0, 1.0)
-            // ..rotateZ(pi)
-            ..rotateX(-pi / 2),
-          alignment: Alignment.center,
-          child: _buildFace(boxImage, 'top'),
-        ),
-        Transform(
-          // STARBOARD
-          transform: Matrix4.identity()
-            ..translateByDouble(-(_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
-            ..rotateY(pi / 2),
-          alignment: Alignment.center,
-          child: _buildFace(boxImage, 'starboard'),
-        ),
-        Transform(
-          // FRONT
-          transform: Matrix4.identity()
-            ..translateByDouble(0.0, 0.0, -(_tallFaceSize.width / 2), 1.0)
-            ..rotateY(0),
-          alignment: Alignment.center,
-          child: _buildFace(boxImage, 'front'),
-        ),
-        Transform(
-          // PORT
-          transform: Matrix4.identity()
-            ..translateByDouble((_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
-            ..rotateY(-pi / 2),
-          alignment: Alignment.center,
-          child: _buildFace(boxImage, 'port'),
-        ),
-        Transform(
-          // BACK
-          transform: Matrix4.identity()
-            ..translateByDouble(0.0, 0.0, (_tallFaceSize.width / 2), 1.0)
-            ..rotateY(pi),
-          alignment: Alignment.center,
-          child: _buildFace(boxImage, 'back'),
-        ),
-      ],
+    final cubeTransform = Matrix4.identity()
+      ..setEntry(3, 2, 0.005)
+      ..rotateX(widget.rx)
+      ..rotateY(widget.ry)
+      ..rotateZ(widget.rz);
+    final visibleFaces = _buildVisibleFaces(
+      boxImage: boxImage,
+      cubeTransform: cubeTransform,
+      halfWidth: halfWidth,
+      halfHeight: halfHeight,
     );
+
+    return Stack(
+      children: visibleFaces.map((face) {
+        return Transform(
+          transform: face.transform,
+          alignment: Alignment.center,
+          child: face.child,
+        );
+      }).toList(),
+    );
+  }
+
+  List<_VisiblePrismFace> _buildVisibleFaces({
+    required ui.Image boxImage,
+    required Matrix4 cubeTransform,
+    required double halfWidth,
+    required double halfHeight,
+  }) {
+    final faces = <_VisiblePrismFace>[];
+
+    for (final face in [
+      _PrismFacePlacement(
+        label: 'keel',
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
+          ..rotateX(pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'deck',
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
+          ..rotateX(-pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'starboard',
+        transform: Matrix4.identity()
+          ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
+          ..rotateY(pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'stem',
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, 0.0, -halfWidth, 1.0),
+      ),
+      _PrismFacePlacement(
+        label: 'port',
+        transform: Matrix4.identity()
+          ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
+          ..rotateY(-pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'stern',
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, 0.0, halfWidth, 1.0)
+          ..rotateY(pi),
+      ),
+    ]) {
+      final transform = Matrix4.copy(cubeTransform)..multiply(face.transform);
+      final center = transform.transform3(vm.Vector3.zero());
+      final normalTip = transform.transform3(vm.Vector3(0.0, 0.0, 1.0));
+      final normal = normalTip - center;
+
+      // Only paint faces whose outward normal still points toward the camera.
+      if (normal.z <= 0.0) continue;
+
+      faces.add(
+        _VisiblePrismFace(
+          depth: center.z,
+          transform: transform,
+          child: _buildFace(boxImage, face.label),
+        ),
+      );
+    }
+
+    faces.sort((a, b) => a.depth.compareTo(b.depth));
+    return faces;
   }
 
   Widget _buildFace(ui.Image image, String label) {
@@ -293,6 +331,28 @@ class _CubeState extends State<Cube> {
 
     return CubeFace(image: image, spec: spec!);
   }
+}
+
+class _PrismFacePlacement {
+  const _PrismFacePlacement({
+    required this.label,
+    required this.transform,
+  });
+
+  final String label;
+  final Matrix4 transform;
+}
+
+class _VisiblePrismFace {
+  const _VisiblePrismFace({
+    required this.depth,
+    required this.transform,
+    required this.child,
+  });
+
+  final double depth;
+  final Matrix4 transform;
+  final Widget child;
 }
 
 class CubeFace extends StatelessWidget {

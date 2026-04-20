@@ -5,8 +5,11 @@ default:
 
 workspace := "workspace"
 
+ensure-box-asset:
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh)
+
 restore:
-	(cd {{workspace}} && flutter pub get)
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter pub get)
 
 format:
 	(cd {{workspace}} && dart format lib test integration_test)
@@ -15,7 +18,7 @@ check-formatting:
 	(cd {{workspace}} && dart format --output=none --set-exit-if-changed lib test integration_test)
 
 check-tests:
-	(cd {{workspace}} && flutter test)
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter test)
 
 devices:
 	(cd {{workspace}} && flutter devices)
@@ -27,7 +30,7 @@ run:
 	just run-web
 
 run-web:
-	(cd {{workspace}} && flutter run -d chrome --web-port 25616 < /dev/null)
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter run -d chrome --web-port 25616 < /dev/null)
 
 run-ios device="":
 	#!/usr/bin/env bash
@@ -37,7 +40,7 @@ run-ios device="":
 	normalized_device="${normalized_device%\"}"
 	normalized_device="${normalized_device#device=}"
 	if [ -n "$normalized_device" ]; then
-	  (cd {{workspace}} && flutter run -d "$normalized_device")
+	  (cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter run -d "$normalized_device")
 	else
 	  echo 'Use `just devices` and rerun with device="<ios-device-id-or-name>".' >&2
 	  exit 1
@@ -51,20 +54,20 @@ run-android device="":
 	normalized_device="${normalized_device%\"}"
 	normalized_device="${normalized_device#device=}"
 	if [ -n "$normalized_device" ]; then
-	  (cd {{workspace}} && flutter run -d "$normalized_device")
+	  (cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter run -d "$normalized_device")
 	else
 	  echo 'Use `just devices` and rerun with device="<android-device-id-or-name>".' >&2
 	  exit 1
 	fi
 
 run-macos:
-	(cd {{workspace}} && flutter run -d macos)
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter run -d macos)
 
 run-windows:
-	(cd {{workspace}} && flutter run -d windows)
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter run -d windows)
 
 run-linux:
-	(cd {{workspace}} && flutter run -d linux)
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter run -d linux)
 
 check-all:
 	just check-formatting
