@@ -78,7 +78,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Transform(
-      transform: Matrix4.rotationY(pi / 4),
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.005)
+        ..rotateX(-1),
       alignment: Alignment.center,
       child: Scaffold(
         appBar: AppBar(
