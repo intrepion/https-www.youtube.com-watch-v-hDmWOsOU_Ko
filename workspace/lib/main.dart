@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math_64.dart' as vm;
 
 const _boxAssetPath = 'assets/box0001.png';
 const _tallFaceSize = Size(165, 178);
@@ -237,95 +236,62 @@ class _RectangularPrismState extends State<RectangularPrism> {
       );
     }
 
-    final cubeTransform = Matrix4.identity()
+    final prismTransform = Matrix4.identity()
       ..setEntry(3, 2, 0.005)
       ..rotateX(widget.rx)
       ..rotateY(widget.ry)
       ..rotateZ(widget.rz);
-    final visibleFaces = _buildVisibleFaces(
-      boxImage: boxImage,
-      cubeTransform: cubeTransform,
-      halfWidth: halfWidth,
-      halfDepth: halfDepth,
-      halfHeight: halfHeight,
+    return Transform(
+      transform: prismTransform,
+      alignment: Alignment.center,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          Transform(
+            transform: Matrix4.identity()
+              ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
+              ..rotateY(pi),
+            alignment: Alignment.center,
+            child: _buildFace(boxImage, 'stern'),
+          ),
+          Transform(
+            transform: Matrix4.identity()
+              ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
+              ..rotateX(-pi / 2),
+            alignment: Alignment.center,
+            child: _buildFace(boxImage, 'keel'),
+          ),
+          Transform(
+            transform: Matrix4.identity()
+              ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
+              ..rotateY(-pi / 2),
+            alignment: Alignment.center,
+            child: _buildFace(boxImage, 'starboard'),
+          ),
+          Transform(
+            transform: Matrix4.identity()
+              ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
+              ..rotateY(pi / 2),
+            alignment: Alignment.center,
+            child: _buildFace(boxImage, 'port'),
+          ),
+          Transform(
+            transform: Matrix4.identity()
+              ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
+              ..rotateX(pi / 2),
+            alignment: Alignment.center,
+            child: _buildFace(boxImage, 'deck'),
+          ),
+          Transform(
+            transform: Matrix4.identity()
+              ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
+            alignment: Alignment.center,
+            child: _buildFace(boxImage, 'stem'),
+          ),
+        ],
+      ),
     );
-
-    return Stack(
-      children: visibleFaces.map((face) {
-        return Transform(
-          transform: face.transform,
-          alignment: Alignment.center,
-          child: face.child,
-        );
-      }).toList(),
-    );
-  }
-
-  List<_VisiblePrismFace> _buildVisibleFaces({
-    required ui.Image boxImage,
-    required Matrix4 cubeTransform,
-    required double halfWidth,
-    required double halfDepth,
-    required double halfHeight,
-  }) {
-    final faces = <_VisiblePrismFace>[];
-
-    for (final face in [
-      _PrismFacePlacement(
-        label: 'keel',
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
-          ..rotateX(pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'deck',
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
-          ..rotateX(-pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'starboard',
-        transform: Matrix4.identity()
-          ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
-          ..rotateY(pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'stem',
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
-      ),
-      _PrismFacePlacement(
-        label: 'port',
-        transform: Matrix4.identity()
-          ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
-          ..rotateY(-pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'stern',
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
-          ..rotateY(pi),
-      ),
-    ]) {
-      final transform = Matrix4.copy(cubeTransform)..multiply(face.transform);
-      final center = transform.transform3(vm.Vector3.zero());
-      final normalTip = transform.transform3(vm.Vector3(0.0, 0.0, 1.0));
-      final normal = normalTip - center;
-
-      // Only paint faces whose outward normal still points toward the camera.
-      if (normal.z <= 0.0) continue;
-
-      faces.add(
-        _VisiblePrismFace(
-          depth: center.z,
-          transform: transform,
-          child: _buildFace(boxImage, face.label),
-        ),
-      );
-    }
-
-    faces.sort((a, b) => a.depth.compareTo(b.depth));
-    return faces;
   }
 
   Widget _buildFace(ui.Image image, String label) {
@@ -336,28 +302,6 @@ class _RectangularPrismState extends State<RectangularPrism> {
   }
 }
 
-class _PrismFacePlacement {
-  const _PrismFacePlacement({
-    required this.label,
-    required this.transform,
-  });
-
-  final String label;
-  final Matrix4 transform;
-}
-
-class _VisiblePrismFace {
-  const _VisiblePrismFace({
-    required this.depth,
-    required this.transform,
-    required this.child,
-  });
-
-  final double depth;
-  final Matrix4 transform;
-  final Widget child;
-}
-
 class CubeFace extends StatelessWidget {
   const CubeFace({super.key, required this.image, required this.spec});
 
@@ -366,16 +310,14 @@ class CubeFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: spec.size.width,
       height: spec.size.height,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
-      ),
-      child: CustomPaint(
-        size: spec.size,
-        painter: _CubeFacePainter(image: image, crop: spec.crop),
+      child: ClipRect(
+        child: CustomPaint(
+          size: spec.size,
+          painter: _CubeFacePainter(image: image, crop: spec.crop),
+        ),
       ),
     );
   }
