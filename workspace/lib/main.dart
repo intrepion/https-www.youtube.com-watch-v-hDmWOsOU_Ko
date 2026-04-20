@@ -7,6 +7,7 @@ import 'package:vector_math/vector_math_64.dart' as vm;
 const _boxAssetPath = 'assets/scentsy-box-165x165x178-ewok.png';
 const _tallFaceSize = Size(165, 178);
 const _squareFaceSize = Size(165, 165);
+const _minimumCropExtent = 0.05;
 
 // Normalized crop rectangles for each face.
 // Values are percentages of box0001.png and can be tuned to pick exact areas.
@@ -45,6 +46,14 @@ const _cubeFaceSpecs = <CubeFaceSpec>[
 
 final _cubeFaceSpecsByLabel = <String, CubeFaceSpec>{
   for (final spec in _cubeFaceSpecs) spec.label: spec,
+};
+const _faceDropdownLabels = <String, String>{
+  'starboard': 'Starboard',
+  'stem': 'Stem',
+  'port': 'Port',
+  'stern': 'Stern',
+  'deck': 'Deck',
+  'keel': 'Keel',
 };
 
 void main() {
@@ -102,6 +111,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double _rx = 0.0, _ry = 0.0, _rz = 0.0, _zoom = 1.0;
+  String? _selectedFace;
+  late final Map<String, Rect> _faceCrops = {
+    for (final spec in _cubeFaceSpecs) spec.label: spec.crop,
+  };
 
   String _formatAngle(double radians) {
     final degrees = radians * 180 / pi;
@@ -109,10 +122,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String _formatZoom(double zoom) => '${zoom.toStringAsFixed(2)}x';
+  String _formatCropValue(double value) => value.toStringAsFixed(4);
 
-  Widget _angleControl({
-    required String axis,
+  Widget _sliderControl({
+    required String label,
     required double value,
+    required double min,
+    required double max,
+    required String Function(double value) formatter,
     required ValueChanged<double> onChanged,
   }) {
     return Padding(
@@ -120,11 +137,129 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$axis: ${_formatAngle(value)}'),
-          Slider(value: value, min: pi * -2, max: pi * 2, onChanged: onChanged),
+          Text('$label: ${formatter(value)}'),
+          Slider(value: value, min: min, max: max, onChanged: onChanged),
         ],
       ),
     );
+  }
+
+  Rect _selectedCrop() {
+    final label = _selectedFace;
+    if (label == null) {
+      throw StateError('No face selected.');
+    }
+    return _faceCrops[label]!;
+  }
+
+  void _updateSelectedCrop({
+    double? left,
+    double? top,
+    double? width,
+    double? height,
+  }) {
+    final label = _selectedFace;
+    if (label == null) return;
+
+    final current = _faceCrops[label]!;
+    final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
+    final nextTop = (top ?? current.top).clamp(0.0, 1.0);
+    final maxWidth = max(_minimumCropExtent, 1.0 - nextLeft);
+    final maxHeight = max(_minimumCropExtent, 1.0 - nextTop);
+    final nextWidth = (width ?? current.width).clamp(
+      _minimumCropExtent,
+      maxWidth,
+    );
+    final nextHeight = (height ?? current.height).clamp(
+      _minimumCropExtent,
+      maxHeight,
+    );
+
+    setState(() {
+      _faceCrops[label] = Rect.fromLTWH(
+        nextLeft,
+        nextTop,
+        nextWidth,
+        nextHeight,
+      );
+    });
+  }
+
+  List<Widget> _buildControls() {
+    final selectedFace = _selectedFace;
+
+    if (selectedFace == null) {
+      return [
+        _sliderControl(
+          label: 'X',
+          value: _rx,
+          min: pi * -2,
+          max: pi * 2,
+          formatter: _formatAngle,
+          onChanged: (value) => setState(() => _rx = value),
+        ),
+        _sliderControl(
+          label: 'Y',
+          value: _ry,
+          min: pi * -2,
+          max: pi * 2,
+          formatter: _formatAngle,
+          onChanged: (value) => setState(() => _ry = value),
+        ),
+        _sliderControl(
+          label: 'Z',
+          value: _rz,
+          min: pi * -2,
+          max: pi * 2,
+          formatter: _formatAngle,
+          onChanged: (value) => setState(() => _rz = value),
+        ),
+        _sliderControl(
+          label: 'Zoom',
+          value: _zoom,
+          min: 0.4,
+          max: 2.5,
+          formatter: _formatZoom,
+          onChanged: (value) => setState(() => _zoom = value),
+        ),
+      ];
+    }
+
+    final crop = _selectedCrop();
+    return [
+      _sliderControl(
+        label: 'Left',
+        value: crop.left,
+        min: 0.0,
+        max: 1.0,
+        formatter: _formatCropValue,
+        onChanged: (value) => _updateSelectedCrop(left: value),
+      ),
+      _sliderControl(
+        label: 'Top',
+        value: crop.top,
+        min: 0.0,
+        max: 1.0,
+        formatter: _formatCropValue,
+        onChanged: (value) => _updateSelectedCrop(top: value),
+      ),
+      _sliderControl(
+        label: 'Width',
+        value: crop.width,
+        min: _minimumCropExtent,
+        max: 1.0,
+        formatter: _formatCropValue,
+        onChanged: (value) => _updateSelectedCrop(width: value),
+      ),
+      _sliderControl(
+        label: 'Height',
+        value: crop.height,
+        min: _minimumCropExtent,
+        max: 1.0,
+        formatter: _formatCropValue,
+        onChanged: (value) => _updateSelectedCrop(height: value),
+      ),
+    ];
   }
 
   @override
@@ -154,44 +289,55 @@ class _MyHomePageState extends State<MyHomePage> {
           // the App.build method, and use it to set our appbar title.
           title: Text(widget.title),
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz, zoom: _zoom),
-            ),
-            const SizedBox(height: 32),
-            _angleControl(
-              axis: 'X',
-              value: _rx,
-              onChanged: (value) => setState(() => _rx = value),
-            ),
-            _angleControl(
-              axis: 'Y',
-              value: _ry,
-              onChanged: (value) => setState(() => _ry = value),
-            ),
-            _angleControl(
-              axis: 'Z',
-              value: _rz,
-              onChanged: (value) => setState(() => _rz = value),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Zoom: ${_formatZoom(_zoom)}'),
-                  Slider(
-                    value: _zoom,
-                    min: 0.4,
-                    max: 2.5,
-                    onChanged: (value) => setState(() => _zoom = value),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: RectangularPrism(
+                    rx: _rx,
+                    ry: _ry,
+                    rz: _rz,
+                    zoom: _zoom,
+                    faceCrops: _faceCrops,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Face Editing Mode',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: DropdownButton<String?>(
+                      value: _selectedFace,
+                      isExpanded: true,
+                      underline: const SizedBox.shrink(),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('(Empty)'),
+                        ),
+                        ..._faceDropdownLabels.entries.map((entry) {
+                          return DropdownMenuItem<String?>(
+                            value: entry.key,
+                            child: Text(entry.value),
+                          );
+                        }),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _selectedFace = value),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._buildControls(),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -217,12 +363,14 @@ class RectangularPrism extends StatefulWidget {
     required this.ry,
     required this.rz,
     required this.zoom,
+    required this.faceCrops,
   });
 
   final double rx;
   final double ry;
   final double rz;
   final double zoom;
+  final Map<String, Rect> faceCrops;
 
   @override
   State<RectangularPrism> createState() => _RectangularPrismState();
@@ -379,8 +527,12 @@ class _RectangularPrismState extends State<RectangularPrism> {
   Widget _buildFace(ui.Image image, String label) {
     final spec = _cubeFaceSpecsByLabel[label];
     assert(spec != null, 'Missing face spec for "$label".');
+    final crop = widget.faceCrops[label] ?? spec!.crop;
 
-    return CubeFace(image: image, spec: spec!);
+    return CubeFace(
+      image: image,
+      spec: CubeFaceSpec(label: label, size: spec!.size, crop: crop),
+    );
   }
 }
 
