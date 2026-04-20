@@ -151,12 +151,14 @@ class Cube extends StatelessWidget {
             color: Colors.orange,
             width: 200,
             height: 300,
-            child: FlutterLogo(size: 300),
+            child: FlutterLogo(size: 200),
           ),
         ),
         Transform(
           // FRONT
-          transform: Matrix4.identity()..translate(0.0, 0.0, -100.0),
+          transform: Matrix4.identity()
+            ..translate(0.0, 0.0, -100.0)
+            ..rotateY(0),
           alignment: Alignment.center,
           child: Container(
             color: Colors.red,
@@ -169,7 +171,7 @@ class Cube extends StatelessWidget {
           // PORT
           transform: Matrix4.identity()
             ..translate(-100.0, 0.0, 0.0)
-            ..rotateY(-pi / 2),
+            ..rotateY(pi / 2),
           alignment: Alignment.center,
           child: Container(
             color: Colors.purple,
@@ -180,7 +182,9 @@ class Cube extends StatelessWidget {
         ),
         Transform(
           // BACK
-          transform: Matrix4.identity()..translate(0.0, 0.0, 100.0),
+          transform: Matrix4.identity()
+            ..translate(0.0, 0.0, 100.0)
+            ..rotateY(pi),
           alignment: Alignment.center,
           child: Container(
             color: Colors.black,
