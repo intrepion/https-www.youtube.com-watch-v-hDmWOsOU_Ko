@@ -116,6 +116,6 @@ class Cube extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlutterLogo(size: 100);
+    return Container(color: Colors.red, child: FlutterLogo(size: 100));
   }
 }
