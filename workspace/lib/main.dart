@@ -102,6 +102,33 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double _rx = 0.0, _ry = 0.0, _rz = 0.0;
 
+  String _formatAngle(double radians) {
+    final degrees = radians * 180 / pi;
+    return '${radians.toStringAsFixed(2)} rad (${degrees.toStringAsFixed(1)} deg)';
+  }
+
+  Widget _angleControl({
+    required String axis,
+    required double value,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$axis: ${_formatAngle(value)}'),
+          Slider(
+            value: value,
+            min: pi * -2,
+            max: pi * 2,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -134,22 +161,19 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Center(child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz)),
             const SizedBox(height: 32),
-            Slider(
+            _angleControl(
+              axis: 'X',
               value: _rx,
-              min: pi * -2,
-              max: pi * 2,
               onChanged: (value) => setState(() => _rx = value),
             ),
-            Slider(
+            _angleControl(
+              axis: 'Y',
               value: _ry,
-              min: pi * -2,
-              max: pi * 2,
               onChanged: (value) => setState(() => _ry = value),
             ),
-            Slider(
+            _angleControl(
+              axis: 'Z',
               value: _rz,
-              min: pi * -2,
-              max: pi * 2,
               onChanged: (value) => setState(() => _rz = value),
             ),
           ],
