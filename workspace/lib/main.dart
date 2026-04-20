@@ -13,7 +13,7 @@ const _cubeFaceSpecs = <CubeFaceSpec>[
   CubeFaceSpec(
     label: 'bottom',
     size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.03, 0.15, 0.22, 0.32),
+    crop: Rect.fromLTWH(0.03, 0.15, 0.22, 0.22),
   ),
   CubeFaceSpec(
     label: 'top',
@@ -41,6 +41,10 @@ const _cubeFaceSpecs = <CubeFaceSpec>[
     crop: Rect.fromLTWH(0.71, 0.41, 0.22, 0.33),
   ),
 ];
+
+final _cubeFaceSpecsByLabel = <String, CubeFaceSpec>{
+  for (final spec in _cubeFaceSpecs) spec.label: spec,
+};
 
 void main() {
   runApp(const MyApp());
@@ -236,24 +240,24 @@ class _CubeState extends State<Cube> {
             ..translateByDouble(0.0, (_tallFaceSize.height / 2), 0.0, 1.0)
             ..rotateX(pi / 2),
           alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[4]),
+          child: _buildFace(boxImage, 'bottom'),
         ),
         Transform(
           // TOP
           transform: Matrix4.identity()
             ..translateByDouble(0.0, -(_tallFaceSize.height / 2), 0.0, 1.0)
-            ..rotateZ(pi / 2)
-            ..rotateY(pi / 2),
+            // ..rotateZ(pi)
+            ..rotateX(-pi / 2),
           alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[5]),
+          child: _buildFace(boxImage, 'top'),
         ),
         Transform(
           // STARBOARD
           transform: Matrix4.identity()
-            ..translateByDouble((_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
-            ..rotateY(-pi / 2),
+            ..translateByDouble(-(_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
+            ..rotateY(pi / 2),
           alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[0]),
+          child: _buildFace(boxImage, 'starboard'),
         ),
         Transform(
           // FRONT
@@ -261,15 +265,15 @@ class _CubeState extends State<Cube> {
             ..translateByDouble(0.0, 0.0, -(_tallFaceSize.width / 2), 1.0)
             ..rotateY(0),
           alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[1]),
+          child: _buildFace(boxImage, 'front'),
         ),
         Transform(
           // PORT
           transform: Matrix4.identity()
-            ..translateByDouble(-(_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
-            ..rotateY(pi / 2),
+            ..translateByDouble((_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
+            ..rotateY(-pi / 2),
           alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[2]),
+          child: _buildFace(boxImage, 'port'),
         ),
         Transform(
           // BACK
@@ -277,10 +281,17 @@ class _CubeState extends State<Cube> {
             ..translateByDouble(0.0, 0.0, (_tallFaceSize.width / 2), 1.0)
             ..rotateY(pi),
           alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[3]),
+          child: _buildFace(boxImage, 'back'),
         ),
       ],
     );
+  }
+
+  Widget _buildFace(ui.Image image, String label) {
+    final spec = _cubeFaceSpecsByLabel[label];
+    assert(spec != null, 'Missing face spec for "$label".');
+
+    return CubeFace(image: image, spec: spec!);
   }
 }
 
