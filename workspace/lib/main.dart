@@ -283,7 +283,8 @@ class _RectangularPrismState extends State<RectangularPrism> {
       ..rotateZ(widget.rz);
     final prismTransform = Matrix4.identity()
       ..setEntry(3, 2, 0.005)
-      ..multiply(prismRotation);
+      ..multiply(prismRotation)
+      ..scaleByDouble(widget.zoom, widget.zoom, widget.zoom, 1.0);
     final orderedFaces = _orderedFaces(
       image: boxImage,
       rotation: prismRotation,
@@ -294,19 +295,16 @@ class _RectangularPrismState extends State<RectangularPrism> {
     return Transform(
       transform: prismTransform,
       alignment: Alignment.center,
-      child: Transform.scale(
-        scale: widget.zoom,
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: orderedFaces.map((face) {
-            return Transform(
-              transform: face.transform,
-              alignment: Alignment.center,
-              child: face.child,
-            );
-          }).toList(),
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: orderedFaces.map((face) {
+          return Transform(
+            transform: face.transform,
+            alignment: Alignment.center,
+            child: face.child,
+          );
+        }).toList(),
       ),
     );
   }
