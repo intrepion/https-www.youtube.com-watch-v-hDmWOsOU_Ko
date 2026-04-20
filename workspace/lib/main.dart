@@ -116,6 +116,27 @@ class Cube extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.red, child: FlutterLogo(size: 100));
+    return Stack(
+      children: [
+        Transform(
+          transform: Matrix4.identity()..translate(0.0, 0.0, -100.0),
+          child: Container(color: Colors.red, child: FlutterLogo(size: 200)),
+        ),
+        Transform(
+          transform: Matrix4.identity()
+            ..translate(100.0, 0.0, 0.0)
+            ..rotateY(-pi / 2),
+          alignment: Alignment.center,
+          child: Container(color: Colors.orange, child: FlutterLogo(size: 200)),
+        ),
+        Transform(
+          transform: Matrix4.identity()
+            ..translate(0.0, 100.0, 0.0)
+            ..rotateX(pi / 2),
+          alignment: Alignment.center,
+          child: Container(color: Colors.blue, child: FlutterLogo(size: 200)),
+        ),
+      ],
+    );
   }
 }
