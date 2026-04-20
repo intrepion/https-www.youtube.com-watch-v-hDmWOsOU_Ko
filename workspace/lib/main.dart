@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -75,8 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Transform.rotate(
-      angle: _counter * 0.01,
+    return Transform(
+      transform: Matrix4.rotationY(pi / 4),
+      alignment: Alignment.center,
       child: Scaffold(
         appBar: AppBar(
           // TRY THIS: Try changing the color here to a specific color (to
