@@ -4,41 +4,41 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 const _boxAssetPath = 'assets/box0001.png';
-const _tallFaceSize = Size(200, 300);
-const _squareFaceSize = Size(200, 200);
+const _tallFaceSize = Size(165, 178);
+const _squareFaceSize = Size(165, 165);
 
 // Normalized crop rectangles for each face.
 // Values are percentages of box0001.png and can be tuned to pick exact areas.
 const _cubeFaceSpecs = <CubeFaceSpec>[
   CubeFaceSpec(
-    label: 'starboard',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.02, 0.00, 0.15, 0.32),
-  ),
-  CubeFaceSpec(
-    label: 'front',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.19, 0.28, 0.15, 0.32),
-  ),
-  CubeFaceSpec(
-    label: 'port',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.38, 0.22, 0.15, 0.32),
-  ),
-  CubeFaceSpec(
-    label: 'back',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.68, 0.27, 0.15, 0.32),
-  ),
-  CubeFaceSpec(
     label: 'bottom',
     size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.40, 0.06, 0.14, 0.20),
+    crop: Rect.fromLTWH(0.03, 0.15, 0.22, 0.32),
   ),
   CubeFaceSpec(
     label: 'top',
     size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.38, 0.74, 0.14, 0.20),
+    crop: Rect.fromLTWH(0.27, 0.15, 0.22, 0.22),
+  ),
+  CubeFaceSpec(
+    label: 'starboard',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.04, 0.41, 0.22, 0.33),
+  ),
+  CubeFaceSpec(
+    label: 'front',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.27, 0.41, 0.22, 0.33),
+  ),
+  CubeFaceSpec(
+    label: 'port',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.48, 0.41, 0.22, 0.33),
+  ),
+  CubeFaceSpec(
+    label: 'back',
+    size: _tallFaceSize,
+    crop: Rect.fromLTWH(0.71, 0.41, 0.22, 0.33),
   ),
 ];
 
@@ -231,41 +231,9 @@ class _CubeState extends State<Cube> {
     return Stack(
       children: [
         Transform(
-          // STARBOARD
-          transform: Matrix4.identity()
-            ..translateByDouble(100.0, 0.0, 0.0, 1.0)
-            ..rotateY(-pi / 2),
-          alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[0]),
-        ),
-        Transform(
-          // FRONT
-          transform: Matrix4.identity()
-            ..translateByDouble(0.0, 0.0, -100.0, 1.0)
-            ..rotateY(0),
-          alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[1]),
-        ),
-        Transform(
-          // PORT
-          transform: Matrix4.identity()
-            ..translateByDouble(-100.0, 0.0, 0.0, 1.0)
-            ..rotateY(pi / 2),
-          alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[2]),
-        ),
-        Transform(
-          // BACK
-          transform: Matrix4.identity()
-            ..translateByDouble(0.0, 0.0, 100.0, 1.0)
-            ..rotateY(pi),
-          alignment: Alignment.center,
-          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[3]),
-        ),
-        Transform(
           // BOTTOM
           transform: Matrix4.identity()
-            ..translateByDouble(0.0, 200.0, 0.0, 1.0)
+            ..translateByDouble(0.0, (_tallFaceSize.height / 2), 0.0, 1.0)
             ..rotateX(pi / 2),
           alignment: Alignment.center,
           child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[4]),
@@ -273,10 +241,43 @@ class _CubeState extends State<Cube> {
         Transform(
           // TOP
           transform: Matrix4.identity()
-            ..translateByDouble(0.0, -100.0, 0.0, 1.0)
-            ..rotateX(-pi / 2),
+            ..translateByDouble(0.0, -(_tallFaceSize.height / 2), 0.0, 1.0)
+            ..rotateZ(pi / 2)
+            ..rotateY(pi / 2),
           alignment: Alignment.center,
           child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[5]),
+        ),
+        Transform(
+          // STARBOARD
+          transform: Matrix4.identity()
+            ..translateByDouble((_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
+            ..rotateY(-pi / 2),
+          alignment: Alignment.center,
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[0]),
+        ),
+        Transform(
+          // FRONT
+          transform: Matrix4.identity()
+            ..translateByDouble(0.0, 0.0, -(_tallFaceSize.width / 2), 1.0)
+            ..rotateY(0),
+          alignment: Alignment.center,
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[1]),
+        ),
+        Transform(
+          // PORT
+          transform: Matrix4.identity()
+            ..translateByDouble(-(_tallFaceSize.width / 2), 0.0, 0.0, 1.0)
+            ..rotateY(pi / 2),
+          alignment: Alignment.center,
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[2]),
+        ),
+        Transform(
+          // BACK
+          transform: Matrix4.identity()
+            ..translateByDouble(0.0, 0.0, (_tallFaceSize.width / 2), 1.0)
+            ..rotateY(pi),
+          alignment: Alignment.center,
+          child: CubeFace(image: boxImage, spec: _cubeFaceSpecs[3]),
         ),
       ],
     );
@@ -284,11 +285,7 @@ class _CubeState extends State<Cube> {
 }
 
 class CubeFace extends StatelessWidget {
-  const CubeFace({
-    super.key,
-    required this.image,
-    required this.spec,
-  });
+  const CubeFace({super.key, required this.image, required this.spec});
 
   final ui.Image image;
   final CubeFaceSpec spec;
@@ -318,10 +315,7 @@ class CubeFace extends StatelessWidget {
 }
 
 class _CubeFacePainter extends CustomPainter {
-  const _CubeFacePainter({
-    required this.image,
-    required this.crop,
-  });
+  const _CubeFacePainter({required this.image, required this.crop});
 
   final ui.Image image;
   final Rect crop;
