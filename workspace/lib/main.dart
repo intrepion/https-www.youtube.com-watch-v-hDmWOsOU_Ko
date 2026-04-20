@@ -56,9 +56,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  Offset _offset = Offset.zero;
+  double _rx = 0.0, _ry = 0.0, _rz = 0.0;
 
   void _incrementCounter() {
     setState(() {
@@ -67,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
     });
   }
 
@@ -79,9 +76,15 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    print('rx: $_rx, ry: $_ry, rz: $_rz');
     return GestureDetector(
       onPanUpdate: (details) {
-        setState(() => _offset += details.delta);
+        _rx += details.delta.dx * 0.01;
+        _ry += details.delta.dy * 0.01;
+        setState(() {
+          _rx %= pi * 2;
+          _ry %= pi * 2;
+        });
       },
       child: Scaffold(
         appBar: AppBar(
@@ -93,18 +96,38 @@ class _MyHomePageState extends State<MyHomePage> {
           // the App.build method, and use it to set our appbar title.
           title: Text(widget.title),
         ),
-        body: Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.005)
-            ..rotateX(_offset.dy / 100)
-            ..rotateY(_offset.dx / 100),
-          alignment: Alignment.center,
-          child: Center(child: Cube()),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.005)
+                ..rotateX(_rx)
+                ..rotateY(_ry)
+                ..rotateZ(_rz),
+              alignment: Alignment.center,
+              child: Center(child: Cube()),
+            ),
+            const SizedBox(height: 32),
+            Slider(
+              value: _rx,
+              min: pi * -2,
+              max: pi * 2,
+              onChanged: (value) => setState(() => _rx = value),
+            ),
+            Slider(
+              value: _ry,
+              min: pi * -2,
+              max: pi * 2,
+              onChanged: (value) => setState(() => _ry = value),
+            ),
+            Slider(
+              value: _rz,
+              min: pi * -2,
+              max: pi * 2,
+              onChanged: (value) => setState(() => _rz = value),
+            ),
+          ],
         ),
       ),
     );
@@ -119,22 +142,78 @@ class Cube extends StatelessWidget {
     return Stack(
       children: [
         Transform(
-          transform: Matrix4.identity()..translate(0.0, 0.0, -100.0),
-          child: Container(color: Colors.red, child: FlutterLogo(size: 200)),
-        ),
-        Transform(
+          // STARBOARD
           transform: Matrix4.identity()
             ..translate(100.0, 0.0, 0.0)
             ..rotateY(-pi / 2),
           alignment: Alignment.center,
-          child: Container(color: Colors.orange, child: FlutterLogo(size: 200)),
+          child: Container(
+            color: Colors.orange,
+            width: 200,
+            height: 300,
+            child: FlutterLogo(size: 300),
+          ),
         ),
         Transform(
+          // FRONT
+          transform: Matrix4.identity()..translate(0.0, 0.0, -100.0),
+          alignment: Alignment.center,
+          child: Container(
+            color: Colors.red,
+            width: 200,
+            height: 300,
+            child: FlutterLogo(size: 200),
+          ),
+        ),
+        Transform(
+          // PORT
           transform: Matrix4.identity()
-            ..translate(0.0, 100.0, 0.0)
+            ..translate(-100.0, 0.0, 0.0)
+            ..rotateY(-pi / 2),
+          alignment: Alignment.center,
+          child: Container(
+            color: Colors.purple,
+            width: 200,
+            height: 300,
+            child: FlutterLogo(size: 200),
+          ),
+        ),
+        Transform(
+          // BACK
+          transform: Matrix4.identity()..translate(0.0, 0.0, 100.0),
+          alignment: Alignment.center,
+          child: Container(
+            color: Colors.black,
+            width: 200,
+            height: 300,
+            child: FlutterLogo(size: 200),
+          ),
+        ),
+        Transform(
+          // BOTTOM
+          transform: Matrix4.identity()
+            ..translate(0.0, 200.0, 0.0)
             ..rotateX(pi / 2),
           alignment: Alignment.center,
-          child: Container(color: Colors.blue, child: FlutterLogo(size: 200)),
+          child: Container(
+            color: Colors.blue,
+            width: 200,
+            height: 200,
+            child: FlutterLogo(size: 200),
+          ),
+        ),
+        Transform(
+          // TOP
+          transform: Matrix4.identity()
+            ..translate(0.0, -100.0, 0.0)
+            ..rotateX(-pi / 2),
+          alignment: Alignment.center,
+          child: Container(
+            color: Colors.pink.withOpacity(0.8),
+            width: 200,
+            height: 200,
+            child: FlutterLogo(size: 200),
+          ),
         ),
       ],
     );
