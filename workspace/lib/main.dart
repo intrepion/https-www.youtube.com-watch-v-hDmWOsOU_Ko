@@ -2,8 +2,9 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' as vm;
 
-const _boxAssetPath = 'assets/box0001.png';
+const _boxAssetPath = 'assets/scentsy-box-165x165x178-ewok.png';
 const _tallFaceSize = Size(165, 178);
 const _squareFaceSize = Size(165, 165);
 
@@ -13,32 +14,32 @@ const _cubeFaceSpecs = <CubeFaceSpec>[
   CubeFaceSpec(
     label: 'keel',
     size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.03, 0.15, 0.22, 0.22),
+    crop: Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
   ),
   CubeFaceSpec(
     label: 'deck',
     size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.27, 0.15, 0.22, 0.22),
+    crop: Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
   ),
   CubeFaceSpec(
     label: 'starboard',
     size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.04, 0.41, 0.22, 0.33),
+    crop: Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
   ),
   CubeFaceSpec(
     label: 'stem',
     size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.27, 0.41, 0.22, 0.33),
+    crop: Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.3300),
   ),
   CubeFaceSpec(
     label: 'port',
     size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.48, 0.41, 0.22, 0.33),
+    crop: Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
   ),
   CubeFaceSpec(
     label: 'stern',
     size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.71, 0.41, 0.22, 0.33),
+    crop: Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
   ),
 ];
 
@@ -118,12 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('$axis: ${_formatAngle(value)}'),
-          Slider(
-            value: value,
-            min: pi * -2,
-            max: pi * 2,
-            onChanged: onChanged,
-          ),
+          Slider(value: value, min: pi * -2, max: pi * 2, onChanged: onChanged),
         ],
       ),
     );
@@ -159,7 +155,9 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz)),
+            Center(
+              child: RectangularPrism(rx: _rx, ry: _ry, rz: _rz),
+            ),
             const SizedBox(height: 32),
             _angleControl(
               axis: 'X',
@@ -254,68 +252,108 @@ class _RectangularPrismState extends State<RectangularPrism> {
 
     if (boxImage == null) {
       return const SizedBox(
-        width: 200,
-        height: 300,
+        width: 165,
+        height: 178,
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    final prismTransform = Matrix4.identity()
-      ..setEntry(3, 2, 0.005)
+    final prismRotation = Matrix4.identity()
       ..rotateX(widget.rx)
       ..rotateY(widget.ry)
       ..rotateZ(widget.rz);
+    final prismTransform = Matrix4.identity()
+      ..setEntry(3, 2, 0.005)
+      ..multiply(prismRotation);
+    final orderedFaces = _orderedFaces(
+      image: boxImage,
+      rotation: prismRotation,
+      halfWidth: halfWidth,
+      halfDepth: halfDepth,
+      halfHeight: halfHeight,
+    );
     return Transform(
       transform: prismTransform,
       alignment: Alignment.center,
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
-        children: [
-          Transform(
-            transform: Matrix4.identity()
-              ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
-              ..rotateY(pi),
+        children: orderedFaces.map((face) {
+          return Transform(
+            transform: face.transform,
             alignment: Alignment.center,
-            child: _buildFace(boxImage, 'stern'),
-          ),
-          Transform(
-            transform: Matrix4.identity()
-              ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
-              ..rotateX(-pi / 2),
-            alignment: Alignment.center,
-            child: _buildFace(boxImage, 'keel'),
-          ),
-          Transform(
-            transform: Matrix4.identity()
-              ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
-              ..rotateY(-pi / 2),
-            alignment: Alignment.center,
-            child: _buildFace(boxImage, 'starboard'),
-          ),
-          Transform(
-            transform: Matrix4.identity()
-              ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
-              ..rotateY(pi / 2),
-            alignment: Alignment.center,
-            child: _buildFace(boxImage, 'port'),
-          ),
-          Transform(
-            transform: Matrix4.identity()
-              ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
-              ..rotateX(pi / 2),
-            alignment: Alignment.center,
-            child: _buildFace(boxImage, 'deck'),
-          ),
-          Transform(
-            transform: Matrix4.identity()
-              ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
-            alignment: Alignment.center,
-            child: _buildFace(boxImage, 'stem'),
-          ),
-        ],
+            child: face.child,
+          );
+        }).toList(),
       ),
     );
+  }
+
+  List<_OrderedPrismFace> _orderedFaces({
+    required ui.Image image,
+    required Matrix4 rotation,
+    required double halfWidth,
+    required double halfDepth,
+    required double halfHeight,
+  }) {
+    final faces = <_OrderedPrismFace>[];
+
+    for (final face in [
+      _PrismFacePlacement(
+        label: 'stern',
+        center: vm.Vector3(0.0, 0.0, halfDepth),
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
+          ..rotateY(pi),
+      ),
+      _PrismFacePlacement(
+        label: 'keel',
+        center: vm.Vector3(0.0, halfHeight, 0.0),
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
+          ..rotateX(pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'starboard',
+        center: vm.Vector3(-halfWidth, 0.0, 0.0),
+        transform: Matrix4.identity()
+          ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
+          ..rotateY(pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'port',
+        center: vm.Vector3(halfWidth, 0.0, 0.0),
+        transform: Matrix4.identity()
+          ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
+          ..rotateY(-pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'deck',
+        center: vm.Vector3(0.0, -halfHeight, 0.0),
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
+          ..rotateX(-pi / 2),
+      ),
+      _PrismFacePlacement(
+        label: 'stem',
+        center: vm.Vector3(0.0, 0.0, -halfDepth),
+        transform: Matrix4.identity()
+          ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
+      ),
+    ]) {
+      final rotatedCenter = rotation.transform3(vm.Vector3.copy(face.center));
+      faces.add(
+        _OrderedPrismFace(
+          depth: rotatedCenter.z,
+          transform: face.transform,
+          child: _buildFace(image, face.label),
+        ),
+      );
+    }
+
+    // Paint far faces first and near faces last so the exterior stays on top.
+    faces.sort((a, b) => b.depth.compareTo(a.depth));
+    return faces;
   }
 
   Widget _buildFace(ui.Image image, String label) {
@@ -324,6 +362,30 @@ class _RectangularPrismState extends State<RectangularPrism> {
 
     return CubeFace(image: image, spec: spec!);
   }
+}
+
+class _PrismFacePlacement {
+  const _PrismFacePlacement({
+    required this.label,
+    required this.center,
+    required this.transform,
+  });
+
+  final String label;
+  final vm.Vector3 center;
+  final Matrix4 transform;
+}
+
+class _OrderedPrismFace {
+  const _OrderedPrismFace({
+    required this.depth,
+    required this.transform,
+    required this.child,
+  });
+
+  final double depth;
+  final Matrix4 transform;
+  final Widget child;
 }
 
 class CubeFace extends StatelessWidget {

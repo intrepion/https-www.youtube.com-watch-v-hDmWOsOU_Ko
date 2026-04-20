@@ -59,7 +59,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/box0001.png
+    - assets/scentsy-box-165x165x178-elsa.png
+    - assets/scentsy-box-165x165x178-ewok.png
+    - assets/scentsy-box-165x165x270-cinderella.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
