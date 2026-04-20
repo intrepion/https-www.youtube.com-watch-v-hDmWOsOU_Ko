@@ -58,6 +58,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  Offset _offset = Offset.zero;
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -80,11 +82,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Transform(
       transform: Matrix4.identity()
         ..setEntry(3, 2, 0.005)
-        ..rotateX(-1),
+        ..rotateX(_offset.dy * pi / 180)
+        ..rotateY(_offset.dx * pi / 180),
       alignment: Alignment.center,
       child: GestureDetector(
         onPanUpdate: (details) {
-          print(details.delta);
+          setState(() => _offset += details.delta);
         },
         child: Scaffold(
           appBar: AppBar(
