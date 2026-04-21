@@ -269,8 +269,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return GestureDetector(
       onPanUpdate: (details) {
-        _rx += details.delta.dx * 0.01;
-        _ry += details.delta.dy * 0.01;
+        _rx += details.delta.dy * 0.01;
+        _ry -= details.delta.dx * 0.01;
         setState(() {
           _rx %= pi * 2;
           _ry %= pi * 2;
