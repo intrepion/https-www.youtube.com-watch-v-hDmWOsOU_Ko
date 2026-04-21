@@ -27,12 +27,12 @@ const _defaultPrismFaceValuesByDimensions = <String, Map<String, Rect>>{
     'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
   },
   '165x165x270': {
-    'keel': Rect.fromLTWH(0.0200, 0.0641, 0.2235, 0.2730),
-    'deck': Rect.fromLTWH(0.2469, 0.0641, 0.2235, 0.2730),
-    'starboard': Rect.fromLTWH(0.0200, 0.3386, 0.2235, 0.4642),
-    'stem': Rect.fromLTWH(0.2469, 0.3386, 0.2235, 0.4642),
-    'port': Rect.fromLTWH(0.4947, 0.3386, 0.2235, 0.4642),
-    'stern': Rect.fromLTWH(0.7204, 0.3386, 0.2235, 0.4642),
+    'keel': Rect.fromLTWH(0.0065, 0.0641, 0.2369, 0.2730),
+    'deck': Rect.fromLTWH(0.2436, 0.0641, 0.2369, 0.2730),
+    'starboard': Rect.fromLTWH(0.0065, 0.3386, 0.2369, 0.4642),
+    'stem': Rect.fromLTWH(0.2436, 0.3386, 0.2369, 0.4642),
+    'port': Rect.fromLTWH(0.4824, 0.3386, 0.2369, 0.4642),
+    'stern': Rect.fromLTWH(0.7195, 0.3386, 0.2369, 0.4642),
   },
 };
 const _prismFaceDropdownLabels = <String, String>{
@@ -111,6 +111,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double _rx = 0.0, _ry = 0.0, _rz = 0.0, _zoom = 1.0;
+  bool _showFaceOverlays = true;
   late String _selectedImageAssetPath = _prismImageAssetPaths.first;
   String _selectedFace = 'stem';
   late final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions = {
@@ -327,12 +328,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       _activePrismFaceValues,
                     ),
                     selectedFace: _selectedFace,
+                    showFaceOverlays: _showFaceOverlays,
                   ),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              title: const Text('Show Face Overlays'),
+              value: _showFaceOverlays,
+              onChanged: (value) => setState(() => _showFaceOverlays = value),
+            ),
+          ),
+          const SizedBox(height: 8),
           _buildDropdownDecorator(
             label: 'Face',
             child: DropdownButton<String>(
@@ -359,38 +371,47 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildPrismPanel(BoxConstraints constraints) {
-    final prismHeight = max(280.0, constraints.maxHeight * 0.56);
+    return LayoutBuilder(
+      builder: (context, panelConstraints) {
+        final prismHeight = (panelConstraints.maxHeight * 0.52).clamp(
+          180.0,
+          420.0,
+        );
 
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: prismHeight,
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: RectangularPrism(
-                  rx: _rx,
-                  ry: _ry,
-                  rz: _rz,
-                  zoom: _zoom,
-                  imageAssetPath: _selectedImageAssetPath,
-                  dimensions: _selectedImageOption.dimensions,
-                  prismFaceValues: _activePrismFaceValues,
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: panelConstraints.maxHeight),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: prismHeight,
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: RectangularPrism(
+                          rx: _rx,
+                          ry: _ry,
+                          rz: _rz,
+                          zoom: _zoom,
+                          imageAssetPath: _selectedImageAssetPath,
+                          dimensions: _selectedImageOption.dimensions,
+                          prismFaceValues: _activePrismFaceValues,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                ..._buildPrismControls(),
+              ],
             ),
           ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-            child: Column(children: _buildPrismControls()),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -745,11 +766,13 @@ class PrismImagePreview extends StatefulWidget {
     required this.imageAssetPath,
     required this.prismFaceValues,
     required this.selectedFace,
+    required this.showFaceOverlays,
   });
 
   final String imageAssetPath;
   final Map<String, Rect> prismFaceValues;
   final String selectedFace;
+  final bool showFaceOverlays;
 
   @override
   State<PrismImagePreview> createState() => _PrismImagePreviewState();
@@ -813,10 +836,12 @@ class _PrismImagePreviewState extends State<PrismImagePreview> {
       child: AspectRatio(
         aspectRatio: previewImage.width / previewImage.height,
         child: CustomPaint(
-          foregroundPainter: _PrismFaceOverlayPainter(
-            prismFaceValues: widget.prismFaceValues,
-            selectedFace: widget.selectedFace,
-          ),
+          foregroundPainter: widget.showFaceOverlays
+              ? _PrismFaceOverlayPainter(
+                  prismFaceValues: widget.prismFaceValues,
+                  selectedFace: widget.selectedFace,
+                )
+              : null,
           child: Image.asset(widget.imageAssetPath, fit: BoxFit.fill),
         ),
       ),
