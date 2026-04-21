@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'prism/prism_config.dart';
 import 'prism/widgets/prism_controls.dart';
-import 'prism/widgets/prism_editor_panels.dart';
+import 'prism/widgets/prism_image_panel.dart';
+import 'prism/widgets/prism_viewport_panel.dart';
 
 void main() {
   runApp(const MyApp());
@@ -129,7 +130,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildPrismPanel(BoxConstraints constraints) {
     return PrismViewportPanel(
-      constraints: constraints,
       rx: _rx,
       ry: _ry,
       rz: _rz,
