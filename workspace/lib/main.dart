@@ -5,9 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
 const _prismImageAssetPaths = <String>[
+  'assets/scentsy-box-165x165x178-ewok-dilines.png',
   'assets/scentsy-box-165x165x178-ewok.png',
+  'assets/scentsy-box-165x165x178-elsa-dilines.png',
   'assets/scentsy-box-165x165x178-elsa.png',
+  'assets/scentsy-box-165x165x270-cinderella-dilines.png',
   'assets/scentsy-box-165x165x270-cinderella.png',
+  'assets/scentsy-box-165x165x270-santa-stitch-dilines.png',
   'assets/scentsy-box-165x165x270-santa-stitch.png',
 ];
 const _minimumCropExtent = 0.05;
@@ -23,10 +27,10 @@ const _defaultPrismFaceValuesByDimensions = <String, Map<String, Rect>>{
     'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
   },
   '165x165x270': {
-    'keel': Rect.fromLTWH(0.0336, 0.0641, 0.2235, 0.2730),
-    'deck': Rect.fromLTWH(0.2561, 0.0641, 0.2235, 0.2730),
+    'keel': Rect.fromLTWH(0.0200, 0.0641, 0.2235, 0.2730),
+    'deck': Rect.fromLTWH(0.2469, 0.0641, 0.2235, 0.2730),
     'starboard': Rect.fromLTWH(0.0200, 0.3386, 0.2235, 0.4642),
-    'stem': Rect.fromLTWH(0.2504, 0.3386, 0.2235, 0.4642),
+    'stem': Rect.fromLTWH(0.2469, 0.3386, 0.2235, 0.4642),
     'port': Rect.fromLTWH(0.4947, 0.3386, 0.2235, 0.4642),
     'stern': Rect.fromLTWH(0.7204, 0.3386, 0.2235, 0.4642),
   },
@@ -38,6 +42,14 @@ const _prismFaceDropdownLabels = <String, String>{
   'stern': 'Stern',
   'deck': 'Deck',
   'keel': 'Keel',
+};
+const _prismFaceOverlayColors = <String, Color>{
+  'starboard': Color(0xFF1565C0),
+  'stem': Color(0xFF2E7D32),
+  'port': Color(0xFFAD1457),
+  'stern': Color(0xFF6A1B9A),
+  'deck': Color(0xFFEF6C00),
+  'keel': Color(0xFF00838F),
 };
 final _prismImageOptions = _prismImageAssetPaths
     .map(PrismImageOption.fromAssetPath)
@@ -304,12 +316,18 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               clipBehavior: Clip.antiAlias,
               child: InteractiveViewer(
+                constrained: false,
                 minScale: 0.5,
                 maxScale: 4.0,
-                child: Image.asset(
-                  _selectedImageAssetPath,
-                  fit: BoxFit.contain,
-                  alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: PrismImagePreview(
+                    imageAssetPath: _selectedImageAssetPath,
+                    prismFaceValues: Map<String, Rect>.from(
+                      _activePrismFaceValues,
+                    ),
+                    selectedFace: _selectedFace,
+                  ),
                 ),
               ),
             ),
@@ -719,6 +737,149 @@ class _OrderedPrismFace {
   final double depth;
   final Matrix4 transform;
   final Widget child;
+}
+
+class PrismImagePreview extends StatefulWidget {
+  const PrismImagePreview({
+    super.key,
+    required this.imageAssetPath,
+    required this.prismFaceValues,
+    required this.selectedFace,
+  });
+
+  final String imageAssetPath;
+  final Map<String, Rect> prismFaceValues;
+  final String selectedFace;
+
+  @override
+  State<PrismImagePreview> createState() => _PrismImagePreviewState();
+}
+
+class _PrismImagePreviewState extends State<PrismImagePreview> {
+  ui.Image? _previewImage;
+  ImageStream? _imageStream;
+  late final ImageStreamListener _imageListener = ImageStreamListener((
+    imageInfo,
+    _,
+  ) {
+    if (!mounted) return;
+    setState(() => _previewImage = imageInfo.image);
+  });
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolvePreviewImage();
+  }
+
+  @override
+  void didUpdateWidget(covariant PrismImagePreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageAssetPath != widget.imageAssetPath) {
+      _resolvePreviewImage();
+    }
+  }
+
+  void _resolvePreviewImage() {
+    final stream = AssetImage(
+      widget.imageAssetPath,
+    ).resolve(createLocalImageConfiguration(context));
+
+    if (_imageStream?.key == stream.key) return;
+
+    _imageStream?.removeListener(_imageListener);
+    _imageStream = stream..addListener(_imageListener);
+  }
+
+  @override
+  void dispose() {
+    _imageStream?.removeListener(_imageListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final previewImage = _previewImage;
+    if (previewImage == null) {
+      return const SizedBox(
+        width: 240,
+        height: 240,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return SizedBox(
+      width: min(previewImage.width.toDouble(), 520.0),
+      child: AspectRatio(
+        aspectRatio: previewImage.width / previewImage.height,
+        child: CustomPaint(
+          foregroundPainter: _PrismFaceOverlayPainter(
+            prismFaceValues: widget.prismFaceValues,
+            selectedFace: widget.selectedFace,
+          ),
+          child: Image.asset(widget.imageAssetPath, fit: BoxFit.fill),
+        ),
+      ),
+    );
+  }
+}
+
+class _PrismFaceOverlayPainter extends CustomPainter {
+  const _PrismFaceOverlayPainter({
+    required this.prismFaceValues,
+    required this.selectedFace,
+  });
+
+  final Map<String, Rect> prismFaceValues;
+  final String selectedFace;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final labelPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    for (final entry in prismFaceValues.entries) {
+      final color = _prismFaceOverlayColors[entry.key] ?? Colors.white;
+      final crop = entry.value;
+      final overlayRect = Rect.fromLTWH(
+        crop.left * size.width,
+        crop.top * size.height,
+        crop.width * size.width,
+        crop.height * size.height,
+      );
+      final isSelected = entry.key == selectedFace;
+      final strokePaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = isSelected ? 4 : 2;
+      final fillPaint = Paint()
+        ..color = color.withValues(alpha: isSelected ? 0.18 : 0.08)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawRect(overlayRect, fillPaint);
+      canvas.drawRect(overlayRect, strokePaint);
+
+      labelPainter.text = TextSpan(
+        text: _prismFaceDropdownLabels[entry.key] ?? entry.key,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: isSelected ? 13 : 11,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          backgroundColor: color.withValues(alpha: 0.85),
+        ),
+      );
+      labelPainter.layout(maxWidth: max(0.0, overlayRect.width - 8));
+      labelPainter.paint(
+        canvas,
+        Offset(overlayRect.left + 4, overlayRect.top + 4),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PrismFaceOverlayPainter oldDelegate) {
+    return oldDelegate.selectedFace != selectedFace ||
+        oldDelegate.prismFaceValues != prismFaceValues;
+  }
 }
 
 class PrismFace extends StatelessWidget {
