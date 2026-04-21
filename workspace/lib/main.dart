@@ -15,6 +15,7 @@ const _prismImageAssetPaths = <String>[
   'assets/scentsy-box-165x165x270-santa-stitch.png',
 ];
 const _minimumCropExtent = 0.05;
+const _prismPerspectiveStrength = 0.0025;
 
 // Normalized crop rectangles keyed by flat-pack dimensions.
 const _defaultPrismFaceValuesByDimensions = <String, Map<String, Rect>>{
@@ -627,7 +628,7 @@ class _RectangularPrismState extends State<RectangularPrism> {
       ..rotateY(widget.ry)
       ..rotateZ(widget.rz);
     final prismTransform = Matrix4.identity()
-      ..setEntry(3, 2, 0.005)
+      ..setEntry(3, 2, _prismPerspectiveStrength)
       ..multiply(prismRotation)
       ..scaleByDouble(widget.zoom, widget.zoom, widget.zoom, 1.0);
     final orderedFaces = _orderedFaces(
