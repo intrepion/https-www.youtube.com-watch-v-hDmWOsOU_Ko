@@ -100,7 +100,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double _rx = 0.0, _ry = 0.0, _rz = 0.0, _zoom = 1.0;
   late String _selectedImageAssetPath = _prismImageAssetPaths.first;
-  String? _selectedFace;
+  String _selectedFace = 'stem';
   late final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions = {
     for (final entry in _defaultPrismFaceValuesByDimensions.entries)
       entry.key: Map<String, Rect>.from(entry.value),
@@ -142,11 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Rect _selectedCrop() {
-    final label = _selectedFace;
-    if (label == null) {
-      throw StateError('No face selected.');
-    }
-    return _activePrismFaceValues[label]!;
+    return _activePrismFaceValues[_selectedFace]!;
   }
 
   void _updateSelectedCrop({
@@ -155,11 +151,8 @@ class _MyHomePageState extends State<MyHomePage> {
     double? width,
     double? height,
   }) {
-    final label = _selectedFace;
-    if (label == null) return;
-
     final prismFaceValues = _activePrismFaceValues;
-    final current = prismFaceValues[label]!;
+    final current = prismFaceValues[_selectedFace]!;
     final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
     final nextTop = (top ?? current.top).clamp(0.0, 1.0);
     final maxWidth = max(_minimumCropExtent, 1.0 - nextLeft);
@@ -174,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     setState(() {
-      prismFaceValues[label] = Rect.fromLTWH(
+      prismFaceValues[_selectedFace] = Rect.fromLTWH(
         nextLeft,
         nextTop,
         nextWidth,
@@ -183,46 +176,44 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  List<Widget> _buildControls() {
-    final selectedFace = _selectedFace;
+  List<Widget> _buildPrismControls() {
+    return [
+      _sliderControl(
+        label: 'X',
+        value: _rx,
+        min: pi * -2,
+        max: pi * 2,
+        formatter: _formatAngle,
+        onChanged: (value) => setState(() => _rx = value),
+      ),
+      _sliderControl(
+        label: 'Y',
+        value: _ry,
+        min: pi * -2,
+        max: pi * 2,
+        formatter: _formatAngle,
+        onChanged: (value) => setState(() => _ry = value),
+      ),
+      _sliderControl(
+        label: 'Z',
+        value: _rz,
+        min: pi * -2,
+        max: pi * 2,
+        formatter: _formatAngle,
+        onChanged: (value) => setState(() => _rz = value),
+      ),
+      _sliderControl(
+        label: 'Zoom',
+        value: _zoom,
+        min: 0.4,
+        max: 2.5,
+        formatter: _formatZoom,
+        onChanged: (value) => setState(() => _zoom = value),
+      ),
+    ];
+  }
 
-    if (selectedFace == null) {
-      return [
-        _sliderControl(
-          label: 'X',
-          value: _rx,
-          min: pi * -2,
-          max: pi * 2,
-          formatter: _formatAngle,
-          onChanged: (value) => setState(() => _rx = value),
-        ),
-        _sliderControl(
-          label: 'Y',
-          value: _ry,
-          min: pi * -2,
-          max: pi * 2,
-          formatter: _formatAngle,
-          onChanged: (value) => setState(() => _ry = value),
-        ),
-        _sliderControl(
-          label: 'Z',
-          value: _rz,
-          min: pi * -2,
-          max: pi * 2,
-          formatter: _formatAngle,
-          onChanged: (value) => setState(() => _rz = value),
-        ),
-        _sliderControl(
-          label: 'Zoom',
-          value: _zoom,
-          min: 0.4,
-          max: 2.5,
-          formatter: _formatZoom,
-          onChanged: (value) => setState(() => _zoom = value),
-        ),
-      ];
-    }
-
+  List<Widget> _buildFaceControls() {
     final crop = _selectedCrop();
     return [
       _sliderControl(
@@ -260,6 +251,131 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
+  Widget _buildDropdownDecorator({
+    required String label,
+    required Widget child,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildImagePanel() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+      child: Column(
+        children: [
+          _buildDropdownDecorator(
+            label: 'Image',
+            child: DropdownButton<String>(
+              value: _selectedImageAssetPath,
+              isExpanded: true,
+              underline: const SizedBox.shrink(),
+              items: _prismImageOptions.map((option) {
+                return DropdownMenuItem<String>(
+                  value: option.assetPath,
+                  child: Text(option.label),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _selectedImageAssetPath = value;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(minHeight: 240, maxHeight: 360),
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).dividerColor),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.asset(
+                  _selectedImageAssetPath,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildDropdownDecorator(
+            label: 'Face',
+            child: DropdownButton<String>(
+              value: _selectedFace,
+              isExpanded: true,
+              underline: const SizedBox.shrink(),
+              items: _prismFaceDropdownLabels.entries.map((entry) {
+                return DropdownMenuItem<String>(
+                  value: entry.key,
+                  child: Text(entry.value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _selectedFace = value);
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          ..._buildFaceControls(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrismPanel(BoxConstraints constraints) {
+    final prismHeight = max(280.0, constraints.maxHeight * 0.56);
+
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: prismHeight,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: RectangularPrism(
+                  rx: _rx,
+                  ry: _ry,
+                  rz: _rz,
+                  zoom: _zoom,
+                  imageAssetPath: _selectedImageAssetPath,
+                  dimensions: _selectedImageOption.dimensions,
+                  prismFaceValues: _activePrismFaceValues,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+            child: Column(children: _buildPrismControls()),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -281,109 +397,28 @@ class _MyHomePageState extends State<MyHomePage> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final prismHeight = max(280.0, constraints.maxHeight * 0.56);
+              final isWideLayout = constraints.maxWidth >= 960;
+
+              if (isWideLayout) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 560),
+                        child: _buildImagePanel(),
+                      ),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: _buildPrismPanel(constraints)),
+                  ],
+                );
+              }
 
               return Column(
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: prismHeight,
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: RectangularPrism(
-                            rx: _rx,
-                            ry: _ry,
-                            rz: _rz,
-                            zoom: _zoom,
-                            imageAssetPath: _selectedImageAssetPath,
-                            dimensions: _selectedImageOption.dimensions,
-                            prismFaceValues: _activePrismFaceValues,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 560),
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: InputDecorator(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Image',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  child: DropdownButton<String>(
-                                    value: _selectedImageAssetPath,
-                                    isExpanded: true,
-                                    underline: const SizedBox.shrink(),
-                                    items: _prismImageOptions.map((option) {
-                                      return DropdownMenuItem<String>(
-                                        value: option.assetPath,
-                                        child: Text(option.label),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      if (value == null) return;
-                                      setState(() {
-                                        _selectedImageAssetPath = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: InputDecorator(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Face Editing Mode',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  child: DropdownButton<String?>(
-                                    value: _selectedFace,
-                                    isExpanded: true,
-                                    underline: const SizedBox.shrink(),
-                                    items: [
-                                      const DropdownMenuItem<String?>(
-                                        value: null,
-                                        child: Text('(Empty)'),
-                                      ),
-                                      ..._prismFaceDropdownLabels.entries.map((
-                                        entry,
-                                      ) {
-                                        return DropdownMenuItem<String?>(
-                                          value: entry.key,
-                                          child: Text(entry.value),
-                                        );
-                                      }),
-                                    ],
-                                    onChanged: (value) =>
-                                        setState(() => _selectedFace = value),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              ..._buildControls(),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: _buildImagePanel()),
+                  const Divider(height: 1),
+                  Expanded(child: _buildPrismPanel(constraints)),
                 ],
               );
             },
