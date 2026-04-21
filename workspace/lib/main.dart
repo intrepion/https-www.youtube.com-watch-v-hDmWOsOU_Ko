@@ -8,6 +8,7 @@ const _prismImageAssetPaths = <String>[
   'assets/scentsy-box-165x165x178-ewok.png',
   'assets/scentsy-box-165x165x178-elsa.png',
   'assets/scentsy-box-165x165x270-cinderella.png',
+  'assets/scentsy-box-165x165x270-santa-stitch.png',
 ];
 const _minimumCropExtent = 0.05;
 
@@ -22,12 +23,12 @@ const _defaultPrismFaceValuesByDimensions = <String, Map<String, Rect>>{
     'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
   },
   '165x165x270': {
-    'keel': Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.2730),
-    'deck': Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.2730),
-    'starboard': Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.4470),
-    'stem': Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.4470),
-    'port': Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.4470),
-    'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.4470),
+    'keel': Rect.fromLTWH(0.0336, 0.0641, 0.2235, 0.2730),
+    'deck': Rect.fromLTWH(0.2561, 0.0641, 0.2235, 0.2730),
+    'starboard': Rect.fromLTWH(0.0200, 0.3386, 0.2235, 0.4642),
+    'stem': Rect.fromLTWH(0.2504, 0.3386, 0.2235, 0.4642),
+    'port': Rect.fromLTWH(0.4947, 0.3386, 0.2235, 0.4642),
+    'stern': Rect.fromLTWH(0.7204, 0.3386, 0.2235, 0.4642),
   },
 };
 const _prismFaceDropdownLabels = <String, String>{
@@ -315,8 +316,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             children: [
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 child: InputDecorator(
                                   decoration: const InputDecoration(
                                     labelText: 'Image',
@@ -343,8 +345,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               const SizedBox(height: 12),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 child: InputDecorator(
                                   decoration: const InputDecoration(
                                     labelText: 'Face Editing Mode',
@@ -419,7 +422,11 @@ class PrismImageOption {
       r'^assets/scentsy-box-(\d+)x(\d+)x(\d+)-(.+)\.png$',
     ).firstMatch(assetPath);
     if (match == null) {
-      throw ArgumentError.value(assetPath, 'assetPath', 'Unexpected asset name');
+      throw ArgumentError.value(
+        assetPath,
+        'assetPath',
+        'Unexpected asset name',
+      );
     }
 
     final width = int.parse(match.group(1)!);
