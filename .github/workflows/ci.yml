@@ -23,7 +23,7 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Ensure box asset exists
+      - name: Ensure declared assets exist
         if: ${{ hashFiles('workspace/pubspec.yaml') != '' }}
         working-directory: workspace
         run: ./tool/ensure_box_asset.sh

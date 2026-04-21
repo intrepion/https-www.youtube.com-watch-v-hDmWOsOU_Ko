@@ -8,6 +8,9 @@ workspace := "workspace"
 ensure-box-asset:
 	(cd {{workspace}} && ./tool/ensure_box_asset.sh)
 
+ensure-declared-assets:
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh)
+
 restore:
 	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter pub get)
 
