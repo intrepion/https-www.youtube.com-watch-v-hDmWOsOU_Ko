@@ -4,50 +4,33 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
-const _boxAssetPath = 'assets/scentsy-box-165x165x178-ewok.png';
-const _tallFaceSize = Size(165, 178);
-const _squareFaceSize = Size(165, 165);
+const _prismImageAssetPaths = <String>[
+  'assets/scentsy-box-165x165x178-ewok.png',
+  'assets/scentsy-box-165x165x178-elsa.png',
+  'assets/scentsy-box-165x165x270-cinderella.png',
+];
 const _minimumCropExtent = 0.05;
 
-// Normalized crop rectangles for each face.
-// Values are percentages of box0001.png and can be tuned to pick exact areas.
-const _cubeFaceSpecs = <CubeFaceSpec>[
-  CubeFaceSpec(
-    label: 'keel',
-    size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
-  ),
-  CubeFaceSpec(
-    label: 'deck',
-    size: _squareFaceSize,
-    crop: Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
-  ),
-  CubeFaceSpec(
-    label: 'starboard',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
-  ),
-  CubeFaceSpec(
-    label: 'stem',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.3300),
-  ),
-  CubeFaceSpec(
-    label: 'port',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
-  ),
-  CubeFaceSpec(
-    label: 'stern',
-    size: _tallFaceSize,
-    crop: Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
-  ),
-];
-
-final _cubeFaceSpecsByLabel = <String, CubeFaceSpec>{
-  for (final spec in _cubeFaceSpecs) spec.label: spec,
+// Normalized crop rectangles keyed by flat-pack dimensions.
+const _defaultPrismFaceValuesByDimensions = <String, Map<String, Rect>>{
+  '165x165x178': {
+    'keel': Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
+    'deck': Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
+    'starboard': Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
+    'stem': Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.3300),
+    'port': Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
+    'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
+  },
+  '165x165x270': {
+    'keel': Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.2730),
+    'deck': Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.2730),
+    'starboard': Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.4470),
+    'stem': Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.4470),
+    'port': Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.4470),
+    'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.4470),
+  },
 };
-const _faceDropdownLabels = <String, String>{
+const _prismFaceDropdownLabels = <String, String>{
   'starboard': 'Starboard',
   'stem': 'Stem',
   'port': 'Port',
@@ -55,6 +38,9 @@ const _faceDropdownLabels = <String, String>{
   'deck': 'Deck',
   'keel': 'Keel',
 };
+final _prismImageOptions = _prismImageAssetPaths
+    .map(PrismImageOption.fromAssetPath)
+    .toList(growable: false);
 
 void main() {
   runApp(const MyApp());
@@ -112,10 +98,19 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double _rx = 0.0, _ry = 0.0, _rz = 0.0, _zoom = 1.0;
+  late String _selectedImageAssetPath = _prismImageAssetPaths.first;
   String? _selectedFace;
-  late final Map<String, Rect> _faceCrops = {
-    for (final spec in _cubeFaceSpecs) spec.label: spec.crop,
+  late final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions = {
+    for (final entry in _defaultPrismFaceValuesByDimensions.entries)
+      entry.key: Map<String, Rect>.from(entry.value),
   };
+
+  PrismImageOption get _selectedImageOption => _prismImageOptions.firstWhere(
+    (option) => option.assetPath == _selectedImageAssetPath,
+  );
+
+  Map<String, Rect> get _activePrismFaceValues =>
+      _prismFaceValuesByDimensions[_selectedImageOption.dimensions.key]!;
 
   String _formatAngle(double radians) {
     final degrees = radians * 180 / pi;
@@ -150,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (label == null) {
       throw StateError('No face selected.');
     }
-    return _faceCrops[label]!;
+    return _activePrismFaceValues[label]!;
   }
 
   void _updateSelectedCrop({
@@ -162,7 +157,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final label = _selectedFace;
     if (label == null) return;
 
-    final current = _faceCrops[label]!;
+    final prismFaceValues = _activePrismFaceValues;
+    final current = prismFaceValues[label]!;
     final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
     final nextTop = (top ?? current.top).clamp(0.0, 1.0);
     final maxWidth = max(_minimumCropExtent, 1.0 - nextLeft);
@@ -177,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     setState(() {
-      _faceCrops[label] = Rect.fromLTWH(
+      prismFaceValues[label] = Rect.fromLTWH(
         nextLeft,
         nextTop,
         nextWidth,
@@ -301,7 +297,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             ry: _ry,
                             rz: _rz,
                             zoom: _zoom,
-                            faceCrops: _faceCrops,
+                            imageAssetPath: _selectedImageAssetPath,
+                            dimensions: _selectedImageOption.dimensions,
+                            prismFaceValues: _activePrismFaceValues,
                           ),
                         ),
                       ),
@@ -321,6 +319,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 child: InputDecorator(
                                   decoration: const InputDecoration(
+                                    labelText: 'Image',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  child: DropdownButton<String>(
+                                    value: _selectedImageAssetPath,
+                                    isExpanded: true,
+                                    underline: const SizedBox.shrink(),
+                                    items: _prismImageOptions.map((option) {
+                                      return DropdownMenuItem<String>(
+                                        value: option.assetPath,
+                                        child: Text(option.label),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      if (value == null) return;
+                                      setState(() {
+                                        _selectedImageAssetPath = value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
                                     labelText: 'Face Editing Mode',
                                     border: OutlineInputBorder(),
                                   ),
@@ -333,7 +359,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         value: null,
                                         child: Text('(Empty)'),
                                       ),
-                                      ..._faceDropdownLabels.entries.map((
+                                      ..._prismFaceDropdownLabels.entries.map((
                                         entry,
                                       ) {
                                         return DropdownMenuItem<String?>(
@@ -365,8 +391,65 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class CubeFaceSpec {
-  const CubeFaceSpec({
+class PrismDimensions {
+  const PrismDimensions({
+    required this.width,
+    required this.depth,
+    required this.height,
+  });
+
+  final int width;
+  final int depth;
+  final int height;
+
+  String get key => '${width}x${depth}x$height';
+  Size get topFaceSize => Size(width.toDouble(), depth.toDouble());
+  Size get sideFaceSize => Size(width.toDouble(), height.toDouble());
+}
+
+class PrismImageOption {
+  PrismImageOption({
+    required this.assetPath,
+    required this.dimensions,
+    required this.name,
+  });
+
+  factory PrismImageOption.fromAssetPath(String assetPath) {
+    final match = RegExp(
+      r'^assets/scentsy-box-(\d+)x(\d+)x(\d+)-(.+)\.png$',
+    ).firstMatch(assetPath);
+    if (match == null) {
+      throw ArgumentError.value(assetPath, 'assetPath', 'Unexpected asset name');
+    }
+
+    final width = int.parse(match.group(1)!);
+    final depth = int.parse(match.group(2)!);
+    final height = int.parse(match.group(3)!);
+    final rawName = match.group(4)!;
+
+    return PrismImageOption(
+      assetPath: assetPath,
+      dimensions: PrismDimensions(width: width, depth: depth, height: height),
+      name: rawName,
+    );
+  }
+
+  final String assetPath;
+  final PrismDimensions dimensions;
+  final String name;
+
+  String get label => '${_titleCaseWords(name)} (${dimensions.key})';
+}
+
+String _titleCaseWords(String value) {
+  return value
+      .split('-')
+      .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+      .join(' ');
+}
+
+class PrismFaceSpec {
+  const PrismFaceSpec({
     required this.label,
     required this.size,
     required this.crop,
@@ -384,39 +467,51 @@ class RectangularPrism extends StatefulWidget {
     required this.ry,
     required this.rz,
     required this.zoom,
-    required this.faceCrops,
+    required this.imageAssetPath,
+    required this.dimensions,
+    required this.prismFaceValues,
   });
 
   final double rx;
   final double ry;
   final double rz;
   final double zoom;
-  final Map<String, Rect> faceCrops;
+  final String imageAssetPath;
+  final PrismDimensions dimensions;
+  final Map<String, Rect> prismFaceValues;
 
   @override
   State<RectangularPrism> createState() => _RectangularPrismState();
 }
 
 class _RectangularPrismState extends State<RectangularPrism> {
-  ui.Image? _boxImage;
+  ui.Image? _prismImage;
   ImageStream? _imageStream;
   late final ImageStreamListener _imageListener = ImageStreamListener((
     imageInfo,
     _,
   ) {
     if (!mounted) return;
-    setState(() => _boxImage = imageInfo.image);
+    setState(() => _prismImage = imageInfo.image);
   });
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _resolveBoxImage();
+    _resolvePrismImage();
   }
 
-  void _resolveBoxImage() {
+  @override
+  void didUpdateWidget(covariant RectangularPrism oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageAssetPath != widget.imageAssetPath) {
+      _resolvePrismImage();
+    }
+  }
+
+  void _resolvePrismImage() {
     final stream = AssetImage(
-      _boxAssetPath,
+      widget.imageAssetPath,
     ).resolve(createLocalImageConfiguration(context));
 
     if (_imageStream?.key == stream.key) return;
@@ -433,15 +528,15 @@ class _RectangularPrismState extends State<RectangularPrism> {
 
   @override
   Widget build(BuildContext context) {
-    final boxImage = _boxImage;
-    final halfWidth = _squareFaceSize.width / 2;
-    final halfDepth = _squareFaceSize.height / 2;
-    final halfHeight = _tallFaceSize.height / 2;
+    final prismImage = _prismImage;
+    final halfWidth = widget.dimensions.topFaceSize.width / 2;
+    final halfDepth = widget.dimensions.topFaceSize.height / 2;
+    final halfHeight = widget.dimensions.sideFaceSize.height / 2;
 
-    if (boxImage == null) {
-      return const SizedBox(
-        width: 165,
-        height: 178,
+    if (prismImage == null) {
+      return SizedBox(
+        width: widget.dimensions.width.toDouble(),
+        height: widget.dimensions.height.toDouble(),
         child: Center(child: CircularProgressIndicator()),
       );
     }
@@ -455,7 +550,7 @@ class _RectangularPrismState extends State<RectangularPrism> {
       ..multiply(prismRotation)
       ..scaleByDouble(widget.zoom, widget.zoom, widget.zoom, 1.0);
     final orderedFaces = _orderedFaces(
-      image: boxImage,
+      image: prismImage,
       rotation: prismRotation,
       halfWidth: halfWidth,
       halfDepth: halfDepth,
@@ -546,13 +641,16 @@ class _RectangularPrismState extends State<RectangularPrism> {
   }
 
   Widget _buildFace(ui.Image image, String label) {
-    final spec = _cubeFaceSpecsByLabel[label];
-    assert(spec != null, 'Missing face spec for "$label".');
-    final crop = widget.faceCrops[label] ?? spec!.crop;
+    final crop = widget.prismFaceValues[label];
+    assert(crop != null, 'Missing face values for "$label".');
+    final size = switch (label) {
+      'deck' || 'keel' => widget.dimensions.topFaceSize,
+      _ => widget.dimensions.sideFaceSize,
+    };
 
-    return CubeFace(
+    return PrismFace(
       image: image,
-      spec: CubeFaceSpec(label: label, size: spec!.size, crop: crop),
+      spec: PrismFaceSpec(label: label, size: size, crop: crop!),
     );
   }
 }
@@ -581,11 +679,11 @@ class _OrderedPrismFace {
   final Widget child;
 }
 
-class CubeFace extends StatelessWidget {
-  const CubeFace({super.key, required this.image, required this.spec});
+class PrismFace extends StatelessWidget {
+  const PrismFace({super.key, required this.image, required this.spec});
 
   final ui.Image image;
-  final CubeFaceSpec spec;
+  final PrismFaceSpec spec;
 
   @override
   Widget build(BuildContext context) {
@@ -595,15 +693,15 @@ class CubeFace extends StatelessWidget {
       child: ClipRect(
         child: CustomPaint(
           size: spec.size,
-          painter: _CubeFacePainter(image: image, crop: spec.crop),
+          painter: _PrismFacePainter(image: image, crop: spec.crop),
         ),
       ),
     );
   }
 }
 
-class _CubeFacePainter extends CustomPainter {
-  const _CubeFacePainter({required this.image, required this.crop});
+class _PrismFacePainter extends CustomPainter {
+  const _PrismFacePainter({required this.image, required this.crop});
 
   final ui.Image image;
   final Rect crop;
@@ -626,7 +724,7 @@ class _CubeFacePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _CubeFacePainter oldDelegate) {
+  bool shouldRepaint(covariant _PrismFacePainter oldDelegate) {
     return oldDelegate.image != image || oldDelegate.crop != crop;
   }
 }
