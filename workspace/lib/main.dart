@@ -67,6 +67,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -280,63 +281,83 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       },
       child: Scaffold(
-        appBar: AppBar(
-          // TRY THIS: Try changing the color here to a specific color (to
-          // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-          // change color while the other colors stay the same.
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-        ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: RectangularPrism(
-                    rx: _rx,
-                    ry: _ry,
-                    rz: _rz,
-                    zoom: _zoom,
-                    faceCrops: _faceCrops,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Face Editing Mode',
-                      border: OutlineInputBorder(),
-                    ),
-                    child: DropdownButton<String?>(
-                      value: _selectedFace,
-                      isExpanded: true,
-                      underline: const SizedBox.shrink(),
-                      items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('(Empty)'),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final prismHeight = max(280.0, constraints.maxHeight * 0.56);
+
+              return Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: prismHeight,
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: RectangularPrism(
+                            rx: _rx,
+                            ry: _ry,
+                            rz: _rz,
+                            zoom: _zoom,
+                            faceCrops: _faceCrops,
+                          ),
                         ),
-                        ..._faceDropdownLabels.entries.map((entry) {
-                          return DropdownMenuItem<String?>(
-                            value: entry.key,
-                            child: Text(entry.value),
-                          );
-                        }),
-                      ],
-                      onChanged: (value) =>
-                          setState(() => _selectedFace = value),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                ..._buildControls(),
-              ],
-            ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 560),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Face Editing Mode',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  child: DropdownButton<String?>(
+                                    value: _selectedFace,
+                                    isExpanded: true,
+                                    underline: const SizedBox.shrink(),
+                                    items: [
+                                      const DropdownMenuItem<String?>(
+                                        value: null,
+                                        child: Text('(Empty)'),
+                                      ),
+                                      ..._faceDropdownLabels.entries.map((
+                                        entry,
+                                      ) {
+                                        return DropdownMenuItem<String?>(
+                                          value: entry.key,
+                                          child: Text(entry.value),
+                                        );
+                                      }),
+                                    ],
+                                    onChanged: (value) =>
+                                        setState(() => _selectedFace = value),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ..._buildControls(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
