@@ -10,7 +10,7 @@ void main() {
 
     expect(find.text('Image'), findsOneWidget);
     expect(find.text('Face'), findsOneWidget);
-    expect(find.text('Show Face Overlays'), findsOneWidget);
+    expect(find.text('Overlays'), findsOneWidget);
     expect(find.text('Stem'), findsWidgets);
     expect(find.textContaining('Zoom:'), findsOneWidget);
     expect(find.byType(Slider), findsNWidgets(8));

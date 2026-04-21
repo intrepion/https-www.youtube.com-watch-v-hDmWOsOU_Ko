@@ -1,60 +1,10 @@
 import 'dart:math';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math_64.dart' as vm;
 
-const _prismImageAssetPaths = <String>[
-  'assets/scentsy-box-165x165x178-ewok-dilines.png',
-  'assets/scentsy-box-165x165x178-ewok.png',
-  'assets/scentsy-box-165x165x178-elsa-dilines.png',
-  'assets/scentsy-box-165x165x178-elsa.png',
-  'assets/scentsy-box-165x165x270-cinderella-dilines.png',
-  'assets/scentsy-box-165x165x270-cinderella.png',
-  'assets/scentsy-box-165x165x270-santa-stitch-dilines.png',
-  'assets/scentsy-box-165x165x270-santa-stitch.png',
-];
-const _minimumCropExtent = 0.05;
-const _prismPerspectiveStrength = 0.0025;
-
-// Normalized crop rectangles keyed by flat-pack dimensions.
-const _defaultPrismFaceValuesByDimensions = <String, Map<String, Rect>>{
-  '165x165x178': {
-    'keel': Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
-    'deck': Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
-    'starboard': Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
-    'stem': Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.3300),
-    'port': Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
-    'stern': Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
-  },
-  '165x165x270': {
-    'keel': Rect.fromLTWH(0.0065, 0.0641, 0.2369, 0.2730),
-    'deck': Rect.fromLTWH(0.2436, 0.0641, 0.2369, 0.2730),
-    'starboard': Rect.fromLTWH(0.0065, 0.3386, 0.2369, 0.4642),
-    'stem': Rect.fromLTWH(0.2436, 0.3386, 0.2369, 0.4642),
-    'port': Rect.fromLTWH(0.4824, 0.3386, 0.2369, 0.4642),
-    'stern': Rect.fromLTWH(0.7195, 0.3386, 0.2369, 0.4642),
-  },
-};
-const _prismFaceDropdownLabels = <String, String>{
-  'starboard': 'Starboard',
-  'stem': 'Stem',
-  'port': 'Port',
-  'stern': 'Stern',
-  'deck': 'Deck',
-  'keel': 'Keel',
-};
-const _prismFaceOverlayColors = <String, Color>{
-  'starboard': Color(0xFF1565C0),
-  'stem': Color(0xFF2E7D32),
-  'port': Color(0xFFAD1457),
-  'stern': Color(0xFF6A1B9A),
-  'deck': Color(0xFFEF6C00),
-  'keel': Color(0xFF00838F),
-};
-final _prismImageOptions = _prismImageAssetPaths
-    .map(PrismImageOption.fromAssetPath)
-    .toList(growable: false);
+import 'prism/prism_config.dart';
+import 'prism/widgets/prism_image_preview.dart';
+import 'prism/widgets/rectangular_prism.dart';
 
 void main() {
   runApp(const MyApp());
@@ -63,29 +13,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -95,15 +29,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -112,15 +37,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double _rx = 0.0, _ry = 0.0, _rz = 0.0, _zoom = 1.0;
-  bool _showFaceOverlays = true;
-  late String _selectedImageAssetPath = _prismImageAssetPaths.first;
+  bool _showFaceOverlays = false;
+  late String _selectedImageAssetPath = prismImageAssetPaths.first;
   String _selectedFace = 'stem';
   late final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions = {
-    for (final entry in _defaultPrismFaceValuesByDimensions.entries)
+    for (final entry in defaultPrismFaceValuesByDimensions.entries)
       entry.key: Map<String, Rect>.from(entry.value),
   };
 
-  PrismImageOption get _selectedImageOption => _prismImageOptions.firstWhere(
+  PrismImageOption get _selectedImageOption => prismImageOptions.firstWhere(
     (option) => option.assetPath == _selectedImageAssetPath,
   );
 
@@ -155,9 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Rect _selectedCrop() {
-    return _activePrismFaceValues[_selectedFace]!;
-  }
+  Rect _selectedCrop() => _activePrismFaceValues[_selectedFace]!;
 
   void _updateSelectedCrop({
     double? left,
@@ -169,14 +92,14 @@ class _MyHomePageState extends State<MyHomePage> {
     final current = prismFaceValues[_selectedFace]!;
     final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
     final nextTop = (top ?? current.top).clamp(0.0, 1.0);
-    final maxWidth = max(_minimumCropExtent, 1.0 - nextLeft);
-    final maxHeight = max(_minimumCropExtent, 1.0 - nextTop);
+    final maxWidth = max(minimumCropExtent, 1.0 - nextLeft);
+    final maxHeight = max(minimumCropExtent, 1.0 - nextTop);
     final nextWidth = (width ?? current.width).clamp(
-      _minimumCropExtent,
+      minimumCropExtent,
       maxWidth,
     );
     final nextHeight = (height ?? current.height).clamp(
-      _minimumCropExtent,
+      minimumCropExtent,
       maxHeight,
     );
 
@@ -249,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _sliderControl(
         label: 'Width',
         value: crop.width,
-        min: _minimumCropExtent,
+        min: minimumCropExtent,
         max: 1.0,
         formatter: _formatCropValue,
         onChanged: (value) => _updateSelectedCrop(width: value),
@@ -257,7 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _sliderControl(
         label: 'Height',
         value: crop.height,
-        min: _minimumCropExtent,
+        min: minimumCropExtent,
         max: 1.0,
         formatter: _formatCropValue,
         onChanged: (value) => _updateSelectedCrop(height: value),
@@ -292,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
               value: _selectedImageAssetPath,
               isExpanded: true,
               underline: const SizedBox.shrink(),
-              items: _prismImageOptions.map((option) {
+              items: prismImageOptions.map((option) {
                 return DropdownMenuItem<String>(
                   value: option.assetPath,
                   child: Text(option.label),
@@ -338,30 +261,44 @@ class _MyHomePageState extends State<MyHomePage> {
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SwitchListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-              title: const Text('Show Face Overlays'),
-              value: _showFaceOverlays,
-              onChanged: (value) => setState(() => _showFaceOverlays = value),
-            ),
-          ),
-          const SizedBox(height: 8),
-          _buildDropdownDecorator(
-            label: 'Face',
-            child: DropdownButton<String>(
-              value: _selectedFace,
-              isExpanded: true,
-              underline: const SizedBox.shrink(),
-              items: _prismFaceDropdownLabels.entries.map((entry) {
-                return DropdownMenuItem<String>(
-                  value: entry.key,
-                  child: Text(entry.value),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() => _selectedFace = value);
-              },
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Face',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: DropdownButton<String>(
+                      value: _selectedFace,
+                      isExpanded: true,
+                      underline: const SizedBox.shrink(),
+                      items: prismFaceDropdownLabels.entries.map((entry) {
+                        return DropdownMenuItem<String>(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => _selectedFace = value);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 170,
+                  child: SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    title: const Text('Overlays'),
+                    value: _showFaceOverlays,
+                    onChanged: (value) =>
+                        setState(() => _showFaceOverlays = value),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -374,10 +311,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildPrismPanel(BoxConstraints constraints) {
     return LayoutBuilder(
       builder: (context, panelConstraints) {
-        final prismHeight = (panelConstraints.maxHeight * 0.52).clamp(
-          180.0,
-          420.0,
-        );
+        final prismHeight =
+            (panelConstraints.maxHeight * 0.52).clamp(180.0, 420.0);
 
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
@@ -418,12 +353,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return GestureDetector(
       onPanUpdate: (details) {
         _rx += details.delta.dy * 0.01;
@@ -466,494 +395,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
-  }
-}
-
-class PrismDimensions {
-  const PrismDimensions({
-    required this.width,
-    required this.depth,
-    required this.height,
-  });
-
-  final int width;
-  final int depth;
-  final int height;
-
-  String get key => '${width}x${depth}x$height';
-  Size get topFaceSize => Size(width.toDouble(), depth.toDouble());
-  Size get sideFaceSize => Size(width.toDouble(), height.toDouble());
-}
-
-class PrismImageOption {
-  PrismImageOption({
-    required this.assetPath,
-    required this.dimensions,
-    required this.name,
-  });
-
-  factory PrismImageOption.fromAssetPath(String assetPath) {
-    final match = RegExp(
-      r'^assets/scentsy-box-(\d+)x(\d+)x(\d+)-(.+)\.png$',
-    ).firstMatch(assetPath);
-    if (match == null) {
-      throw ArgumentError.value(
-        assetPath,
-        'assetPath',
-        'Unexpected asset name',
-      );
-    }
-
-    final width = int.parse(match.group(1)!);
-    final depth = int.parse(match.group(2)!);
-    final height = int.parse(match.group(3)!);
-    final rawName = match.group(4)!;
-
-    return PrismImageOption(
-      assetPath: assetPath,
-      dimensions: PrismDimensions(width: width, depth: depth, height: height),
-      name: rawName,
-    );
-  }
-
-  final String assetPath;
-  final PrismDimensions dimensions;
-  final String name;
-
-  String get label => '${_titleCaseWords(name)} (${dimensions.key})';
-}
-
-String _titleCaseWords(String value) {
-  return value
-      .split('-')
-      .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
-      .join(' ');
-}
-
-class PrismFaceSpec {
-  const PrismFaceSpec({
-    required this.label,
-    required this.size,
-    required this.crop,
-  });
-
-  final String label;
-  final Size size;
-  final Rect crop;
-}
-
-class RectangularPrism extends StatefulWidget {
-  const RectangularPrism({
-    super.key,
-    required this.rx,
-    required this.ry,
-    required this.rz,
-    required this.zoom,
-    required this.imageAssetPath,
-    required this.dimensions,
-    required this.prismFaceValues,
-  });
-
-  final double rx;
-  final double ry;
-  final double rz;
-  final double zoom;
-  final String imageAssetPath;
-  final PrismDimensions dimensions;
-  final Map<String, Rect> prismFaceValues;
-
-  @override
-  State<RectangularPrism> createState() => _RectangularPrismState();
-}
-
-class _RectangularPrismState extends State<RectangularPrism> {
-  ui.Image? _prismImage;
-  ImageStream? _imageStream;
-  late final ImageStreamListener _imageListener = ImageStreamListener((
-    imageInfo,
-    _,
-  ) {
-    if (!mounted) return;
-    setState(() => _prismImage = imageInfo.image);
-  });
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _resolvePrismImage();
-  }
-
-  @override
-  void didUpdateWidget(covariant RectangularPrism oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageAssetPath != widget.imageAssetPath) {
-      _resolvePrismImage();
-    }
-  }
-
-  void _resolvePrismImage() {
-    final stream = AssetImage(
-      widget.imageAssetPath,
-    ).resolve(createLocalImageConfiguration(context));
-
-    if (_imageStream?.key == stream.key) return;
-
-    _imageStream?.removeListener(_imageListener);
-    _imageStream = stream..addListener(_imageListener);
-  }
-
-  @override
-  void dispose() {
-    _imageStream?.removeListener(_imageListener);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final prismImage = _prismImage;
-    final halfWidth = widget.dimensions.topFaceSize.width / 2;
-    final halfDepth = widget.dimensions.topFaceSize.height / 2;
-    final halfHeight = widget.dimensions.sideFaceSize.height / 2;
-
-    if (prismImage == null) {
-      return SizedBox(
-        width: widget.dimensions.width.toDouble(),
-        height: widget.dimensions.height.toDouble(),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final prismRotation = Matrix4.identity()
-      ..rotateX(widget.rx)
-      ..rotateY(widget.ry)
-      ..rotateZ(widget.rz);
-    final prismTransform = Matrix4.identity()
-      ..setEntry(3, 2, _prismPerspectiveStrength)
-      ..multiply(prismRotation)
-      ..scaleByDouble(widget.zoom, widget.zoom, widget.zoom, 1.0);
-    final orderedFaces = _orderedFaces(
-      image: prismImage,
-      rotation: prismRotation,
-      halfWidth: halfWidth,
-      halfDepth: halfDepth,
-      halfHeight: halfHeight,
-    );
-    return Transform(
-      transform: prismTransform,
-      alignment: Alignment.center,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: orderedFaces.map((face) {
-          return Transform(
-            transform: face.transform,
-            alignment: Alignment.center,
-            child: face.child,
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  List<_OrderedPrismFace> _orderedFaces({
-    required ui.Image image,
-    required Matrix4 rotation,
-    required double halfWidth,
-    required double halfDepth,
-    required double halfHeight,
-  }) {
-    final faces = <_OrderedPrismFace>[];
-
-    for (final face in [
-      _PrismFacePlacement(
-        label: 'stern',
-        center: vm.Vector3(0.0, 0.0, halfDepth),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
-          ..rotateY(pi),
-      ),
-      _PrismFacePlacement(
-        label: 'keel',
-        center: vm.Vector3(0.0, halfHeight, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
-          ..rotateX(pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'starboard',
-        center: vm.Vector3(-halfWidth, 0.0, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
-          ..rotateY(pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'port',
-        center: vm.Vector3(halfWidth, 0.0, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
-          ..rotateY(-pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'deck',
-        center: vm.Vector3(0.0, -halfHeight, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
-          ..rotateX(-pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'stem',
-        center: vm.Vector3(0.0, 0.0, -halfDepth),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
-      ),
-    ]) {
-      final rotatedCenter = rotation.transform3(vm.Vector3.copy(face.center));
-      faces.add(
-        _OrderedPrismFace(
-          depth: rotatedCenter.z,
-          transform: face.transform,
-          child: _buildFace(image, face.label),
-        ),
-      );
-    }
-
-    // Paint far faces first and near faces last so the exterior stays on top.
-    faces.sort((a, b) => b.depth.compareTo(a.depth));
-    return faces;
-  }
-
-  Widget _buildFace(ui.Image image, String label) {
-    final crop = widget.prismFaceValues[label];
-    assert(crop != null, 'Missing face values for "$label".');
-    final size = switch (label) {
-      'deck' || 'keel' => widget.dimensions.topFaceSize,
-      _ => widget.dimensions.sideFaceSize,
-    };
-
-    return PrismFace(
-      image: image,
-      spec: PrismFaceSpec(label: label, size: size, crop: crop!),
-    );
-  }
-}
-
-class _PrismFacePlacement {
-  const _PrismFacePlacement({
-    required this.label,
-    required this.center,
-    required this.transform,
-  });
-
-  final String label;
-  final vm.Vector3 center;
-  final Matrix4 transform;
-}
-
-class _OrderedPrismFace {
-  const _OrderedPrismFace({
-    required this.depth,
-    required this.transform,
-    required this.child,
-  });
-
-  final double depth;
-  final Matrix4 transform;
-  final Widget child;
-}
-
-class PrismImagePreview extends StatefulWidget {
-  const PrismImagePreview({
-    super.key,
-    required this.imageAssetPath,
-    required this.prismFaceValues,
-    required this.selectedFace,
-    required this.showFaceOverlays,
-  });
-
-  final String imageAssetPath;
-  final Map<String, Rect> prismFaceValues;
-  final String selectedFace;
-  final bool showFaceOverlays;
-
-  @override
-  State<PrismImagePreview> createState() => _PrismImagePreviewState();
-}
-
-class _PrismImagePreviewState extends State<PrismImagePreview> {
-  ui.Image? _previewImage;
-  ImageStream? _imageStream;
-  late final ImageStreamListener _imageListener = ImageStreamListener((
-    imageInfo,
-    _,
-  ) {
-    if (!mounted) return;
-    setState(() => _previewImage = imageInfo.image);
-  });
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _resolvePreviewImage();
-  }
-
-  @override
-  void didUpdateWidget(covariant PrismImagePreview oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageAssetPath != widget.imageAssetPath) {
-      _resolvePreviewImage();
-    }
-  }
-
-  void _resolvePreviewImage() {
-    final stream = AssetImage(
-      widget.imageAssetPath,
-    ).resolve(createLocalImageConfiguration(context));
-
-    if (_imageStream?.key == stream.key) return;
-
-    _imageStream?.removeListener(_imageListener);
-    _imageStream = stream..addListener(_imageListener);
-  }
-
-  @override
-  void dispose() {
-    _imageStream?.removeListener(_imageListener);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final previewImage = _previewImage;
-    if (previewImage == null) {
-      return const SizedBox(
-        width: 240,
-        height: 240,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    return SizedBox(
-      width: min(previewImage.width.toDouble(), 520.0),
-      child: AspectRatio(
-        aspectRatio: previewImage.width / previewImage.height,
-        child: CustomPaint(
-          foregroundPainter: widget.showFaceOverlays
-              ? _PrismFaceOverlayPainter(
-                  prismFaceValues: widget.prismFaceValues,
-                  selectedFace: widget.selectedFace,
-                )
-              : null,
-          child: Image.asset(widget.imageAssetPath, fit: BoxFit.fill),
-        ),
-      ),
-    );
-  }
-}
-
-class _PrismFaceOverlayPainter extends CustomPainter {
-  const _PrismFaceOverlayPainter({
-    required this.prismFaceValues,
-    required this.selectedFace,
-  });
-
-  final Map<String, Rect> prismFaceValues;
-  final String selectedFace;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final labelPainter = TextPainter(textDirection: TextDirection.ltr);
-
-    for (final entry in prismFaceValues.entries) {
-      final color = _prismFaceOverlayColors[entry.key] ?? Colors.white;
-      final crop = entry.value;
-      final overlayRect = Rect.fromLTWH(
-        crop.left * size.width,
-        crop.top * size.height,
-        crop.width * size.width,
-        crop.height * size.height,
-      );
-      final isSelected = entry.key == selectedFace;
-      final strokePaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = isSelected ? 4 : 2;
-      final fillPaint = Paint()
-        ..color = color.withValues(alpha: isSelected ? 0.18 : 0.08)
-        ..style = PaintingStyle.fill;
-
-      canvas.drawRect(overlayRect, fillPaint);
-      canvas.drawRect(overlayRect, strokePaint);
-
-      labelPainter.text = TextSpan(
-        text: _prismFaceDropdownLabels[entry.key] ?? entry.key,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: isSelected ? 13 : 11,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          backgroundColor: color.withValues(alpha: 0.85),
-        ),
-      );
-      labelPainter.layout(maxWidth: max(0.0, overlayRect.width - 8));
-      labelPainter.paint(
-        canvas,
-        Offset(overlayRect.left + 4, overlayRect.top + 4),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _PrismFaceOverlayPainter oldDelegate) {
-    return oldDelegate.selectedFace != selectedFace ||
-        oldDelegate.prismFaceValues != prismFaceValues;
-  }
-}
-
-class PrismFace extends StatelessWidget {
-  const PrismFace({super.key, required this.image, required this.spec});
-
-  final ui.Image image;
-  final PrismFaceSpec spec;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: spec.size.width,
-      height: spec.size.height,
-      child: ClipRect(
-        child: CustomPaint(
-          size: spec.size,
-          painter: _PrismFacePainter(image: image, crop: spec.crop),
-        ),
-      ),
-    );
-  }
-}
-
-class _PrismFacePainter extends CustomPainter {
-  const _PrismFacePainter({required this.image, required this.crop});
-
-  final ui.Image image;
-  final Rect crop;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final sourceRect = Rect.fromLTWH(
-      crop.left * image.width,
-      crop.top * image.height,
-      crop.width * image.width,
-      crop.height * image.height,
-    );
-
-    canvas.drawImageRect(
-      image,
-      sourceRect,
-      Offset.zero & size,
-      Paint()..filterQuality = FilterQuality.high,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _PrismFacePainter oldDelegate) {
-    return oldDelegate.image != image || oldDelegate.crop != crop;
   }
 }
