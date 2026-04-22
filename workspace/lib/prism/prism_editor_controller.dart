@@ -5,45 +5,48 @@ import 'prism_config.dart';
 import 'prism_view_state.dart';
 
 class PrismEditorController extends ChangeNotifier {
-  bool showFaceOverlays = false;
-  String selectedImageAssetPath = prismImageAssetPaths.first;
-  String selectedFace = 'stem';
+  bool _showFaceOverlays = false;
+  String _selectedImageAssetPath = prismImageAssetPaths.first;
+  PrismFaceId _selectedFace = PrismFaceId.stem;
 
   final PrismFaceValueStore _faceValueStore = PrismFaceValueStore();
   final PrismViewState _viewState = PrismViewState();
 
+  bool get showFaceOverlays => _showFaceOverlays;
+  String get selectedImageAssetPath => _selectedImageAssetPath;
+  PrismFaceId get selectedFace => _selectedFace;
   double get rx => _viewState.rx;
   double get ry => _viewState.ry;
   double get rz => _viewState.rz;
   double get zoom => _viewState.zoom;
 
   PrismImageOption get selectedImageOption => prismImageOptions.firstWhere(
-    (option) => option.assetPath == selectedImageAssetPath,
+    (option) => option.assetPath == _selectedImageAssetPath,
   );
 
-  Map<String, Rect> get activePrismFaceValues =>
+  Map<PrismFaceId, Rect> get activePrismFaceValues =>
       _faceValueStore.faceValuesFor(selectedImageOption.dimensions);
 
   Rect get selectedCrop => _faceValueStore.selectedCrop(
     dimensions: selectedImageOption.dimensions,
-    selectedFace: selectedFace,
+    selectedFace: _selectedFace,
   );
 
   void setImage(String value) {
-    if (selectedImageAssetPath == value) return;
-    selectedImageAssetPath = value;
+    if (_selectedImageAssetPath == value) return;
+    _selectedImageAssetPath = value;
     notifyListeners();
   }
 
-  void setFace(String value) {
-    if (selectedFace == value) return;
-    selectedFace = value;
+  void setFace(PrismFaceId value) {
+    if (_selectedFace == value) return;
+    _selectedFace = value;
     notifyListeners();
   }
 
   void setShowFaceOverlays(bool value) {
-    if (showFaceOverlays == value) return;
-    showFaceOverlays = value;
+    if (_showFaceOverlays == value) return;
+    _showFaceOverlays = value;
     notifyListeners();
   }
 
@@ -76,7 +79,7 @@ class PrismEditorController extends ChangeNotifier {
     if (
       _faceValueStore.updateSelectedCrop(
         dimensions: selectedImageOption.dimensions,
-        selectedFace: selectedFace,
+        selectedFace: _selectedFace,
         left: left,
         top: top,
         width: width,

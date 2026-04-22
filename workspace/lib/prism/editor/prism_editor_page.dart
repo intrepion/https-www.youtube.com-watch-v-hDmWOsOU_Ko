@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../prism_editor_controller.dart';
 import '../prism_config.dart';
-import '../controls/prism_controls.dart';
+import '../controls/prism_face_crop_controls.dart';
+import '../controls/prism_rotation_controls.dart';
 import 'prism_editor_layout.dart';
 import 'prism_image_panel.dart';
 import 'prism_viewport_panel.dart';
@@ -17,32 +18,27 @@ class PrismEditorPage extends StatefulWidget {
 class _PrismEditorPageState extends State<PrismEditorPage> {
   late final PrismEditorController _controller = PrismEditorController();
 
-  List<Widget> _buildPrismControls() {
-    return [
-      PrismRotationControls(
-        rx: _controller.rx,
-        ry: _controller.ry,
-        rz: _controller.rz,
-        zoom: _controller.zoom,
-        onRxChanged: _controller.setRx,
-        onRyChanged: _controller.setRy,
-        onRzChanged: _controller.setRz,
-        onZoomChanged: _controller.setZoom,
-      ),
-    ];
+  PrismRotationControls _buildPrismControls() {
+    return PrismRotationControls(
+      rx: _controller.rx,
+      ry: _controller.ry,
+      rz: _controller.rz,
+      zoom: _controller.zoom,
+      onRxChanged: _controller.setRx,
+      onRyChanged: _controller.setRy,
+      onRzChanged: _controller.setRz,
+      onZoomChanged: _controller.setZoom,
+    );
   }
 
-  List<Widget> _buildFaceControls() {
-    return [
-      PrismFaceCropControls(
-        crop: _controller.selectedCrop,
-        onLeftChanged: (value) => _controller.updateSelectedCrop(left: value),
-        onTopChanged: (value) => _controller.updateSelectedCrop(top: value),
-        onWidthChanged: (value) => _controller.updateSelectedCrop(width: value),
-        onHeightChanged: (value) =>
-            _controller.updateSelectedCrop(height: value),
-      ),
-    ];
+  PrismFaceCropControls _buildFaceControls() {
+    return PrismFaceCropControls(
+      crop: _controller.selectedCrop,
+      onLeftChanged: (value) => _controller.updateSelectedCrop(left: value),
+      onTopChanged: (value) => _controller.updateSelectedCrop(top: value),
+      onWidthChanged: (value) => _controller.updateSelectedCrop(width: value),
+      onHeightChanged: (value) => _controller.updateSelectedCrop(height: value),
+    );
   }
 
   Widget _buildImagePanel() {
@@ -68,7 +64,7 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
       imageAssetPath: _controller.selectedImageAssetPath,
       dimensions: _controller.selectedImageOption.dimensions,
       prismFaceValues: _controller.activePrismFaceValues,
-      controls: _buildPrismControls(),
+      rotationControls: _buildPrismControls(),
     );
   }
 

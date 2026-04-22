@@ -22,7 +22,7 @@ class RectangularPrism extends StatelessWidget {
   final double zoom;
   final String imageAssetPath;
   final PrismDimensions dimensions;
-  final Map<String, Rect> prismFaceValues;
+  final Map<PrismFaceId, Rect> prismFaceValues;
 
   @override
   Widget build(BuildContext context) {

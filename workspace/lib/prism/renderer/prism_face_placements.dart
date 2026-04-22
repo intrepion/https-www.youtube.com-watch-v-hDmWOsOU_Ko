@@ -7,12 +7,12 @@ import '../prism_config.dart';
 
 class PrismFacePlacement {
   const PrismFacePlacement({
-    required this.label,
+    required this.faceId,
     required this.center,
     required this.transform,
   });
 
-  final String label;
+  final PrismFaceId faceId;
   final vm.Vector3 center;
   final Matrix4 transform;
 }
@@ -24,42 +24,42 @@ List<PrismFacePlacement> buildPrismFacePlacements(PrismDimensions dimensions) {
 
   return [
     PrismFacePlacement(
-      label: 'stern',
+      faceId: PrismFaceId.stern,
       center: vm.Vector3(0.0, 0.0, halfDepth),
       transform: Matrix4.identity()
         ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
         ..rotateY(pi),
     ),
     PrismFacePlacement(
-      label: 'keel',
+      faceId: PrismFaceId.keel,
       center: vm.Vector3(0.0, halfHeight, 0.0),
       transform: Matrix4.identity()
         ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
         ..rotateX(pi / 2),
     ),
     PrismFacePlacement(
-      label: 'starboard',
+      faceId: PrismFaceId.starboard,
       center: vm.Vector3(-halfWidth, 0.0, 0.0),
       transform: Matrix4.identity()
         ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
         ..rotateY(pi / 2),
     ),
     PrismFacePlacement(
-      label: 'port',
+      faceId: PrismFaceId.port,
       center: vm.Vector3(halfWidth, 0.0, 0.0),
       transform: Matrix4.identity()
         ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
         ..rotateY(-pi / 2),
     ),
     PrismFacePlacement(
-      label: 'deck',
+      faceId: PrismFaceId.deck,
       center: vm.Vector3(0.0, -halfHeight, 0.0),
       transform: Matrix4.identity()
         ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
         ..rotateX(-pi / 2),
     ),
     PrismFacePlacement(
-      label: 'stem',
+      faceId: PrismFaceId.stem,
       center: vm.Vector3(0.0, 0.0, -halfDepth),
       transform: Matrix4.identity()
         ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),

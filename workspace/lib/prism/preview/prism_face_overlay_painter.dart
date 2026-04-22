@@ -10,8 +10,8 @@ class PrismFaceOverlayPainter extends CustomPainter {
     required this.selectedFace,
   });
 
-  final Map<String, Rect> prismFaceValues;
-  final String selectedFace;
+  final Map<PrismFaceId, Rect> prismFaceValues;
+  final PrismFaceId selectedFace;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -39,7 +39,7 @@ class PrismFaceOverlayPainter extends CustomPainter {
       canvas.drawRect(overlayRect, strokePaint);
 
       labelPainter.text = TextSpan(
-        text: prismFaceDropdownLabels[entry.key] ?? entry.key,
+        text: prismFaceDropdownLabels[entry.key] ?? entry.key.label,
         style: TextStyle(
           color: Colors.white,
           fontSize: isSelected ? 13 : 11,

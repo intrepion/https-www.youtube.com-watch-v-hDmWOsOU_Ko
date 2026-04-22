@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../prism_config.dart';
 import 'asset_ui_image_loader.dart';
 import 'prism_face_overlay_painter.dart';
 
@@ -15,8 +16,8 @@ class PrismImagePreview extends StatelessWidget {
   });
 
   final String imageAssetPath;
-  final Map<String, Rect> prismFaceValues;
-  final String selectedFace;
+  final Map<PrismFaceId, Rect> prismFaceValues;
+  final PrismFaceId selectedFace;
   final bool showFaceOverlays;
 
   @override

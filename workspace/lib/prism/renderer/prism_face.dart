@@ -2,14 +2,16 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../prism_models.dart';
+
 class PrismFaceSpec {
   const PrismFaceSpec({
-    required this.label,
+    required this.faceId,
     required this.size,
     required this.crop,
   });
 
-  final String label;
+  final PrismFaceId faceId;
   final Size size;
   final Rect crop;
 }

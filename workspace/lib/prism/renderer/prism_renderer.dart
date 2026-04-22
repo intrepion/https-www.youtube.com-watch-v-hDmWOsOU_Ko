@@ -28,7 +28,7 @@ class PrismRenderer {
 
   final ui.Image image;
   final PrismDimensions dimensions;
-  final Map<String, Rect> prismFaceValues;
+  final Map<PrismFaceId, Rect> prismFaceValues;
 
   List<OrderedPrismFace> orderedFaces(Matrix4 rotation) {
     final faces = <OrderedPrismFace>[];
@@ -39,7 +39,7 @@ class PrismRenderer {
         OrderedPrismFace(
           depth: rotatedCenter.z,
           transform: face.transform,
-          child: _buildFace(face.label),
+          child: _buildFace(face.faceId),
         ),
       );
     }
@@ -48,17 +48,17 @@ class PrismRenderer {
     return faces;
   }
 
-  Widget _buildFace(String label) {
-    final crop = prismFaceValues[label];
-    assert(crop != null, 'Missing face values for "$label".');
-    final size = switch (label) {
-      'deck' || 'keel' => dimensions.topFaceSize,
+  Widget _buildFace(PrismFaceId faceId) {
+    final crop = prismFaceValues[faceId];
+    assert(crop != null, 'Missing face values for "${faceId.key}".');
+    final size = switch (faceId) {
+      PrismFaceId.deck || PrismFaceId.keel => dimensions.topFaceSize,
       _ => dimensions.sideFaceSize,
     };
 
     return PrismFace(
       image: image,
-      spec: PrismFaceSpec(label: label, size: size, crop: crop!),
+      spec: PrismFaceSpec(faceId: faceId, size: size, crop: crop!),
     );
   }
 }

@@ -1,5 +1,21 @@
 import 'package:flutter/material.dart';
 
+enum PrismFaceId {
+  starboard('starboard', 'Starboard'),
+  stem('stem', 'Stem'),
+  port('port', 'Port'),
+  stern('stern', 'Stern'),
+  deck('deck', 'Deck'),
+  keel('keel', 'Keel');
+
+  const PrismFaceId(this.key, this.label);
+
+  final String key;
+  final String label;
+
+  bool get isTopOrBottom => this == PrismFaceId.deck || this == PrismFaceId.keel;
+}
+
 class PrismDimensions {
   const PrismDimensions({
     required this.width,
@@ -14,6 +30,21 @@ class PrismDimensions {
   String get key => '${width}x${depth}x$height';
   Size get topFaceSize => Size(width.toDouble(), depth.toDouble());
   Size get sideFaceSize => Size(width.toDouble(), height.toDouble());
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PrismDimensions &&
+        other.width == width &&
+        other.depth == depth &&
+        other.height == height;
+  }
+
+  @override
+  int get hashCode => Object.hash(width, depth, height);
+
+  @override
+  String toString() => 'PrismDimensions($key)';
 }
 
 class PrismImageOption {
@@ -52,6 +83,21 @@ class PrismImageOption {
   final String name;
 
   String get label => '${_titleCaseWords(name)} (${dimensions.key})';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PrismImageOption &&
+        other.assetPath == assetPath &&
+        other.dimensions == dimensions &&
+        other.name == name;
+  }
+
+  @override
+  int get hashCode => Object.hash(assetPath, dimensions, name);
+
+  @override
+  String toString() => 'PrismImageOption($assetPath)';
 }
 
 String _titleCaseWords(String value) {

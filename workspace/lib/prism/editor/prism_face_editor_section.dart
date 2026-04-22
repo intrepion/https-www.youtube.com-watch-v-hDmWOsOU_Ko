@@ -12,11 +12,11 @@ class PrismFaceEditorSection extends StatelessWidget {
     required this.controls,
   });
 
-  final String selectedFace;
+  final PrismFaceId selectedFace;
   final bool showFaceOverlays;
-  final ValueChanged<String> onFaceChanged;
+  final ValueChanged<PrismFaceId> onFaceChanged;
   final ValueChanged<bool> onShowFaceOverlaysChanged;
-  final List<Widget> controls;
+  final Widget controls;
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +34,20 @@ class PrismFaceEditorSection extends StatelessWidget {
                     border: OutlineInputBorder(),
                   ),
                   child: DropdownButton<String>(
-                    value: selectedFace,
+                    value: selectedFace.key,
                     isExpanded: true,
                     underline: const SizedBox.shrink(),
-                    items: prismFaceDropdownLabels.entries.map((entry) {
+                    items: PrismFaceId.values.map((faceId) {
                       return DropdownMenuItem<String>(
-                        value: entry.key,
-                        child: Text(entry.value),
+                        value: faceId.key,
+                        child: Text(prismFaceDropdownLabels[faceId] ?? faceId.label),
                       );
                     }).toList(),
                     onChanged: (value) {
                       if (value == null) return;
-                      onFaceChanged(value);
+                      onFaceChanged(
+                        PrismFaceId.values.firstWhere((faceId) => faceId.key == value),
+                      );
                     },
                   ),
                 ),
@@ -64,7 +66,7 @@ class PrismFaceEditorSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...controls,
+        controls,
       ],
     );
   }

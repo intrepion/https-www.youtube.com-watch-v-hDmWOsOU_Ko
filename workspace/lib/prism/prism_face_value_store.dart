@@ -8,24 +8,24 @@ class PrismFaceValueStore {
   PrismFaceValueStore()
     : _prismFaceValuesByDimensions = {
         for (final entry in defaultPrismFaceValuesByDimensions.entries)
-          entry.key: Map<String, Rect>.from(entry.value),
+          entry.key: Map<PrismFaceId, Rect>.from(entry.value),
       };
 
-  final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions;
+  final Map<String, Map<PrismFaceId, Rect>> _prismFaceValuesByDimensions;
 
-  Map<String, Rect> faceValuesFor(PrismDimensions dimensions) =>
+  Map<PrismFaceId, Rect> faceValuesFor(PrismDimensions dimensions) =>
       _prismFaceValuesByDimensions[dimensions.key]!;
 
   Rect selectedCrop({
     required PrismDimensions dimensions,
-    required String selectedFace,
+    required PrismFaceId selectedFace,
   }) {
     return faceValuesFor(dimensions)[selectedFace]!;
   }
 
   bool updateSelectedCrop({
     required PrismDimensions dimensions,
-    required String selectedFace,
+    required PrismFaceId selectedFace,
     double? left,
     double? top,
     double? width,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../controls/prism_rotation_controls.dart';
 import '../prism_config.dart';
 import '../renderer/rectangular_prism.dart';
 
@@ -13,7 +14,7 @@ class PrismViewportPanel extends StatelessWidget {
     required this.imageAssetPath,
     required this.dimensions,
     required this.prismFaceValues,
-    required this.controls,
+    required this.rotationControls,
   });
 
   final double rx;
@@ -22,8 +23,8 @@ class PrismViewportPanel extends StatelessWidget {
   final double zoom;
   final String imageAssetPath;
   final PrismDimensions dimensions;
-  final Map<String, Rect> prismFaceValues;
-  final List<Widget> controls;
+  final Map<PrismFaceId, Rect> prismFaceValues;
+  final PrismRotationControls rotationControls;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,7 @@ class PrismViewportPanel extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...controls,
+                rotationControls,
               ],
             ),
           ),

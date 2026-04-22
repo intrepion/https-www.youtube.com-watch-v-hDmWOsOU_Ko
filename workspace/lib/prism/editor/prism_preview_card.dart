@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../prism_config.dart';
 import '../preview/prism_image_preview.dart';
 
 class PrismPreviewCard extends StatelessWidget {
@@ -12,8 +13,8 @@ class PrismPreviewCard extends StatelessWidget {
   });
 
   final String imageAssetPath;
-  final Map<String, Rect> prismFaceValues;
-  final String selectedFace;
+  final Map<PrismFaceId, Rect> prismFaceValues;
+  final PrismFaceId selectedFace;
   final bool showFaceOverlays;
 
   @override
@@ -36,7 +37,7 @@ class PrismPreviewCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: PrismImagePreview(
               imageAssetPath: imageAssetPath,
-              prismFaceValues: Map<String, Rect>.from(prismFaceValues),
+              prismFaceValues: Map<PrismFaceId, Rect>.from(prismFaceValues),
               selectedFace: selectedFace,
               showFaceOverlays: showFaceOverlays,
             ),

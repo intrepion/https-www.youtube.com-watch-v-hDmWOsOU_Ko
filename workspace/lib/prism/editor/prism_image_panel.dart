@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../controls/prism_face_crop_controls.dart';
 import '../prism_config.dart';
 import 'prism_face_editor_section.dart';
 import 'prism_image_selector.dart';
@@ -21,13 +22,13 @@ class PrismImagePanel extends StatelessWidget {
 
   final String selectedImageAssetPath;
   final List<PrismImageOption> imageOptions;
-  final Map<String, Rect> prismFaceValues;
-  final String selectedFace;
+  final Map<PrismFaceId, Rect> prismFaceValues;
+  final PrismFaceId selectedFace;
   final bool showFaceOverlays;
   final ValueChanged<String> onImageChanged;
-  final ValueChanged<String> onFaceChanged;
+  final ValueChanged<PrismFaceId> onFaceChanged;
   final ValueChanged<bool> onShowFaceOverlaysChanged;
-  final List<Widget> faceControls;
+  final PrismFaceCropControls faceControls;
 
   @override
   Widget build(BuildContext context) {
