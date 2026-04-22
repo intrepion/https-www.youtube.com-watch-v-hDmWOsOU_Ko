@@ -70,7 +70,7 @@ class PrismImageOption {
       throw ArgumentError.value(
         assetPath,
         'assetPath',
-        'Unexpected asset name',
+        'Expected assets/scentsy-box-WxDxH-name.ext',
       );
     }
 
@@ -79,11 +79,12 @@ class PrismImageOption {
     final height = int.parse(match.group(3)!);
     final rawName = match.group(4)!;
     final extension = match.group(5)!;
+    final name = _normalizeAssetName(rawName, assetPath);
 
     return PrismImageOption(
       assetPath: assetPath,
       dimensions: PrismDimensions(width: width, depth: depth, height: height),
-      name: rawName,
+      name: name,
       extension: extension,
     );
   }
@@ -115,6 +116,19 @@ class PrismImageOption {
 String _titleCaseWords(String value) {
   return value
       .split('-')
+      .where((part) => part.isNotEmpty)
       .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
       .join(' ');
+}
+
+String _normalizeAssetName(String rawName, String assetPath) {
+  final parts = rawName.split('-');
+  if (parts.any((part) => part.isEmpty)) {
+    throw ArgumentError.value(
+      assetPath,
+      'assetPath',
+      'Asset name segments must not be empty',
+    );
+  }
+  return rawName;
 }

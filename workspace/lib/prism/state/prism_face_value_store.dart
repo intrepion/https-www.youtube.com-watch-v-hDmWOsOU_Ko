@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -19,13 +20,16 @@ class PrismFaceValueStore {
   int get version => _version;
 
   Map<PrismFaceId, Rect> faceValuesFor(PrismDimensions dimensions) =>
+      UnmodifiableMapView(_mutableFaceValuesFor(dimensions));
+
+  Map<PrismFaceId, Rect> _mutableFaceValuesFor(PrismDimensions dimensions) =>
       _prismFaceValuesByDimensions[dimensions]!;
 
   Rect selectedCrop({
     required PrismDimensions dimensions,
     required PrismFaceId selectedFace,
   }) {
-    return faceValuesFor(dimensions)[selectedFace]!;
+    return _mutableFaceValuesFor(dimensions)[selectedFace]!;
   }
 
   bool updateSelectedCrop({
@@ -36,7 +40,7 @@ class PrismFaceValueStore {
     double? width,
     double? height,
   }) {
-    final prismFaceValues = faceValuesFor(dimensions);
+    final prismFaceValues = _mutableFaceValuesFor(dimensions);
     final current = prismFaceValues[selectedFace]!;
     final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
     final nextTop = (top ?? current.top).clamp(0.0, 1.0);

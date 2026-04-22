@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'prism_editor_constants.dart';
 import '../model/prism_models.dart';
 import '../preview/prism_image_preview.dart';
 
@@ -22,21 +23,24 @@ class PrismPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: prismPreviewHorizontalPadding),
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 240, maxHeight: 360),
+        constraints: const BoxConstraints(
+          minHeight: prismPreviewMinHeight,
+          maxHeight: prismPreviewMaxHeight,
+        ),
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).dividerColor),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(prismPreviewBorderRadius),
         ),
         clipBehavior: Clip.antiAlias,
         child: InteractiveViewer(
           constrained: false,
-          minScale: 0.5,
-          maxScale: 4.0,
+          minScale: prismPreviewMinScale,
+          maxScale: prismPreviewMaxScale,
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(prismPreviewInnerPadding),
             child: PrismImagePreview(
               imageAssetPath: imageAssetPath,
               prismFaceValues: prismFaceValues,

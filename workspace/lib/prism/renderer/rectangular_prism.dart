@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../config/prism_constants.dart';
+import '../preview/asset_load_placeholder.dart';
 import '../model/prism_models.dart';
 import '../preview/asset_ui_image_loader.dart';
 import 'prism_renderer.dart';
@@ -31,19 +32,17 @@ class RectangularPrism extends StatelessWidget {
       assetPath: imageAssetPath,
       builder: (context, loadState) {
         if (loadState.hasError) {
-          return SizedBox(
+          return AssetLoadPlaceholder.error(
             width: dimensions.width.toDouble(),
             height: dimensions.height.toDouble(),
-            child: const Center(child: Text('Image failed to load')),
           );
         }
 
         final prismImage = loadState.image;
         if (loadState.isLoading || prismImage == null) {
-          return SizedBox(
+          return AssetLoadPlaceholder.loading(
             width: dimensions.width.toDouble(),
             height: dimensions.height.toDouble(),
-            child: const Center(child: CircularProgressIndicator()),
           );
         }
 

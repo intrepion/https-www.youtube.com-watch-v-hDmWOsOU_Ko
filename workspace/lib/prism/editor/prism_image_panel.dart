@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../controls/prism_face_crop_controls.dart';
 import '../model/prism_models.dart';
+import 'prism_editor_constants.dart';
 import 'prism_face_editor_section.dart';
 import 'prism_image_selector.dart';
 import 'prism_preview_card.dart';
@@ -35,7 +36,12 @@ class PrismImagePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+      padding: const EdgeInsets.fromLTRB(
+        0,
+        prismEditorPanelTopPadding,
+        0,
+        prismEditorPanelBottomPadding,
+      ),
       child: Column(
         children: [
           PrismImageSelector(
@@ -43,7 +49,7 @@ class PrismImagePanel extends StatelessWidget {
             imageOptions: imageOptions,
             onImageChanged: onImageChanged,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: prismEditorSectionSpacing),
           PrismPreviewCard(
             imageAssetPath: selectedImageAssetPath,
             prismFaceValues: prismFaceValues,
@@ -51,7 +57,7 @@ class PrismImagePanel extends StatelessWidget {
             showFaceOverlays: showFaceOverlays,
             faceValuesVersion: faceValuesVersion,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: prismEditorSectionSpacing),
           PrismFaceEditorSection(
             selectedFace: selectedFace,
             showFaceOverlays: showFaceOverlays,

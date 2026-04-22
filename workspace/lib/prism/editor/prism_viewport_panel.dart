@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../controls/prism_rotation_controls.dart';
 import '../model/prism_models.dart';
 import '../renderer/rectangular_prism.dart';
+import 'prism_editor_constants.dart';
 
 class PrismViewportPanel extends StatelessWidget {
   const PrismViewportPanel({
@@ -31,10 +32,18 @@ class PrismViewportPanel extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, panelConstraints) {
         final prismHeight =
-            (panelConstraints.maxHeight * 0.52).clamp(180.0, 420.0);
+            (panelConstraints.maxHeight * prismViewportHeightFactor).clamp(
+              prismViewportMinHeight,
+              prismViewportMaxHeight,
+            );
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+          padding: const EdgeInsets.fromLTRB(
+            0,
+            prismEditorPanelTopPadding,
+            0,
+            prismEditorPanelBottomPadding,
+          ),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: panelConstraints.maxHeight),
             child: Column(
@@ -46,7 +55,7 @@ class PrismViewportPanel extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(prismViewportInnerPadding),
                         child: RectangularPrism(
                           rx: rx,
                           ry: ry,
@@ -60,7 +69,7 @@ class PrismViewportPanel extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: prismViewportSectionSpacing),
                 rotationControls,
               ],
             ),
