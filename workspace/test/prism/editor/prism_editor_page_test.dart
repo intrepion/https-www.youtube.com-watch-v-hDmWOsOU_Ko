@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hello_world/prism/controls/prism_face_crop_controls.dart';
-import 'package:hello_world/prism/editor/prism_editor_page.dart';
 import 'package:hello_world/prism/editor/prism_preview_card.dart';
-
-void _setLargeSurface(WidgetTester tester) {
-  tester.view.devicePixelRatio = 1.0;
-  tester.view.physicalSize = const Size(1600, 2000);
-  addTearDown(tester.view.resetPhysicalSize);
-  addTearDown(tester.view.resetDevicePixelRatio);
-}
+import '../../test_helpers/prism_widget_test_helpers.dart';
 
 void main() {
   testWidgets('overlay toggle updates the preview card state', (
     WidgetTester tester,
   ) async {
-    _setLargeSurface(tester);
-    await tester.pumpWidget(const MaterialApp(home: PrismEditorPage()));
-    await tester.pump();
+    await pumpPrismEditor(tester);
 
     var previewCard = tester.widget<PrismPreviewCard>(find.byType(PrismPreviewCard));
     expect(previewCard.showFaceOverlays, isFalse);
@@ -32,21 +23,18 @@ void main() {
   testWidgets('face dropdown switches the active crop controls', (
     WidgetTester tester,
   ) async {
-    _setLargeSurface(tester);
-    await tester.pumpWidget(const MaterialApp(home: PrismEditorPage()));
-    await tester.pump();
+    await pumpPrismEditor(tester);
 
     var cropControls = tester.widget<PrismFaceCropControls>(
       find.byType(PrismFaceCropControls),
     );
     expect(cropControls.crop.left, closeTo(0.2561, 0.0001));
 
-    await tester.tap(find.byKey(const ValueKey('face-dropdown')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
-    await tester.tap(find.text('Port').last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
+    await openDropdownAndChoose(
+      tester,
+      dropdownKey: const ValueKey('face-dropdown'),
+      optionText: 'Port',
+    );
 
     cropControls = tester.widget<PrismFaceCropControls>(
       find.byType(PrismFaceCropControls),

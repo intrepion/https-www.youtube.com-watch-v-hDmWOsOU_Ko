@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../config/prism_constants.dart';
-import '../preview/asset_load_placeholder.dart';
 import '../model/prism_models.dart';
-import '../preview/asset_ui_image_loader.dart';
+import '../preview/resolved_asset_image_view.dart';
 import 'prism_renderer.dart';
 
 class RectangularPrism extends StatelessWidget {
@@ -27,24 +26,13 @@ class RectangularPrism extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dimensions = imageOption.dimensions;
-    return AssetUiImageLoader(
+    return ResolvedAssetImageView(
       assetPath: imageOption.assetPath,
-      builder: (context, loadState) {
-        if (loadState.hasError) {
-          return AssetLoadPlaceholder.error(
-            width: dimensions.width.toDouble(),
-            height: dimensions.height.toDouble(),
-          );
-        }
-
-        final prismImage = loadState.image;
-        if (loadState.isLoading || prismImage == null) {
-          return AssetLoadPlaceholder.loading(
-            width: dimensions.width.toDouble(),
-            height: dimensions.height.toDouble(),
-          );
-        }
-
+      loadingWidth: dimensions.width.toDouble(),
+      loadingHeight: dimensions.height.toDouble(),
+      errorWidth: dimensions.width.toDouble(),
+      errorHeight: dimensions.height.toDouble(),
+      builder: (context, prismImage) {
         final prismRotation = Matrix4.identity()
           ..rotateX(rx)
           ..rotateY(ry)

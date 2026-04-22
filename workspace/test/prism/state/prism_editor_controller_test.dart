@@ -9,7 +9,7 @@ void main() {
 
     controller.setImage(prismImageOptions.last);
 
-    expect(controller.selectedImageOption, prismImageOptions.last);
+    expect(controller.snapshot.selectedImageOption, prismImageOptions.last);
   });
 
   test('snapshot keeps the selected image dimensions and crop in sync', () {
@@ -31,6 +31,6 @@ void main() {
 
     controller.setFace(PrismFaceId.port);
 
-    expect(controller.selectedFace, PrismFaceId.port);
+    expect(controller.snapshot.selectedFace, PrismFaceId.port);
   });
 }

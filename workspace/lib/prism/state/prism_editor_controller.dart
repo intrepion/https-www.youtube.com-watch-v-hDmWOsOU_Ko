@@ -14,25 +14,9 @@ class PrismEditorController extends ChangeNotifier {
   final PrismFaceValueStore _faceValueStore = PrismFaceValueStore();
   final PrismViewState _viewState = PrismViewState();
 
-  bool get showFaceOverlays => _showFaceOverlays;
-  String get selectedImageAssetPath => _selectedImageOption.assetPath;
-  PrismFaceId get selectedFace => _selectedFace;
-  int get cropVersion => _faceValueStore.version;
-  double get rx => _viewState.rx;
-  double get ry => _viewState.ry;
-  double get rz => _viewState.rz;
-  double get zoom => _viewState.zoom;
-  PrismImageOption get selectedImageOption => _selectedImageOption;
+  PrismEditorSnapshot get snapshot => _buildSnapshot();
 
-  Map<PrismFaceId, Rect> get activePrismFaceValues =>
-      _faceValueStore.faceValuesFor(selectedImageOption.dimensions);
-
-  Rect get selectedCrop => _faceValueStore.selectedCrop(
-    dimensions: selectedImageOption.dimensions,
-    selectedFace: _selectedFace,
-  );
-
-  PrismEditorSnapshot get snapshot => PrismEditorSnapshot(
+  PrismEditorSnapshot _buildSnapshot() => PrismEditorSnapshot(
     selectedImageOption: _selectedImageOption,
     selectedFace: _selectedFace,
     showFaceOverlays: _showFaceOverlays,
@@ -106,7 +90,7 @@ class PrismEditorController extends ChangeNotifier {
   }) {
     _notifyIfChanged(
       _faceValueStore.updateSelectedCrop(
-        dimensions: selectedImageOption.dimensions,
+        dimensions: _selectedImageOption.dimensions,
         selectedFace: _selectedFace,
         left: left,
         top: top,

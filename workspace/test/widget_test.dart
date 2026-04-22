@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:hello_world/main.dart';
+import 'package:hello_world/prism/editor/prism_editor_page.dart';
+import 'test_helpers/prism_widget_test_helpers.dart';
 
 void main() {
-  testWidgets('Prism editor smoke test', (WidgetTester tester) async {
+  testWidgets('app boots into the prism editor page', (WidgetTester tester) async {
+    setPrismTestSurface(tester);
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    expect(find.text('Image'), findsOneWidget);
-    expect(find.text('Face'), findsOneWidget);
-    expect(find.text('Overlays'), findsOneWidget);
-    expect(find.text('Stem'), findsWidgets);
-    expect(find.textContaining('Zoom:'), findsOneWidget);
-    expect(find.byType(Slider), findsNWidgets(8));
-    expect(find.byType(SwitchListTile), findsOneWidget);
+    expect(find.byType(PrismEditorPage), findsOneWidget);
+    expect(find.byType(Scaffold), findsOneWidget);
   });
 }

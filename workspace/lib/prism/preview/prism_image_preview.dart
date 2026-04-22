@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../editor/prism_editor_constants.dart';
 import '../model/prism_models.dart';
-import 'asset_load_placeholder.dart';
-import 'asset_ui_image_loader.dart';
 import 'prism_face_overlay_painter.dart';
+import 'resolved_asset_image_view.dart';
 
 class PrismImagePreview extends StatelessWidget {
   const PrismImagePreview({
@@ -26,24 +25,13 @@ class PrismImagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AssetUiImageLoader(
+    return ResolvedAssetImageView(
       assetPath: imageOption.assetPath,
-      builder: (context, loadState) {
-        if (loadState.hasError) {
-          return const AssetLoadPlaceholder.error(
-            width: prismPreviewPlaceholderExtent,
-            height: prismPreviewPlaceholderExtent,
-          );
-        }
-
-        final previewImage = loadState.image;
-        if (loadState.isLoading || previewImage == null) {
-          return const AssetLoadPlaceholder.loading(
-            width: prismPreviewPlaceholderExtent,
-            height: prismPreviewPlaceholderExtent,
-          );
-        }
-
+      loadingWidth: prismPreviewPlaceholderExtent,
+      loadingHeight: prismPreviewPlaceholderExtent,
+      errorWidth: prismPreviewPlaceholderExtent,
+      errorHeight: prismPreviewPlaceholderExtent,
+      builder: (context, previewImage) {
         return SizedBox(
           width: min(previewImage.width.toDouble(), prismPreviewMaxWidth),
           child: AspectRatio(
