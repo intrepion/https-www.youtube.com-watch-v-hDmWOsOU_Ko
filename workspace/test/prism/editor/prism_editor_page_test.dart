@@ -10,13 +10,17 @@ void main() {
   ) async {
     await pumpPrismEditor(tester);
 
-    var previewCard = tester.widget<PrismPreviewCard>(find.byType(PrismPreviewCard));
+    var previewCard = tester.widget<PrismPreviewCard>(
+      find.byType(PrismPreviewCard),
+    );
     expect(previewCard.showFaceOverlays, isFalse);
 
     await tester.tap(find.byKey(const ValueKey('show-face-overlays-switch')));
     await tester.pump();
 
-    previewCard = tester.widget<PrismPreviewCard>(find.byType(PrismPreviewCard));
+    previewCard = tester.widget<PrismPreviewCard>(
+      find.byType(PrismPreviewCard),
+    );
     expect(previewCard.showFaceOverlays, isTrue);
   });
 

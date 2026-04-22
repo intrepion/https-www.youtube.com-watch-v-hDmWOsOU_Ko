@@ -8,7 +8,10 @@ void main() {
         'assets/scentsy-box-165x165x178-ewok.webp',
       );
 
-      expect(option.dimensions, const PrismDimensions(width: 165, depth: 165, height: 178));
+      expect(
+        option.dimensions,
+        const PrismDimensions(width: 165, depth: 165, height: 178),
+      );
       expect(option.name, 'ewok');
       expect(option.extension, 'webp');
       expect(option.label, 'Ewok (165x165x178)');

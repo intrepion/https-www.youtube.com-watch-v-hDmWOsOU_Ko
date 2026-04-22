@@ -53,7 +53,9 @@ class PrismViewportPanel extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Padding(
-                        padding: const EdgeInsets.all(prismViewportInnerPadding),
+                        padding: const EdgeInsets.all(
+                          prismViewportInnerPadding,
+                        ),
                         child: RectangularPrism(
                           rx: rx,
                           ry: ry,

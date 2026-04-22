@@ -5,24 +5,25 @@ import '../model/prism_models.dart';
 const _dims165x165x178 = PrismDimensions(width: 165, depth: 165, height: 178);
 const _dims165x165x270 = PrismDimensions(width: 165, depth: 165, height: 270);
 
-final defaultPrismFaceValuesByDimensions = <PrismDimensions, Map<PrismFaceId, Rect>>{
-  _dims165x165x178: {
-    PrismFaceId.keel: Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
-    PrismFaceId.deck: Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
-    PrismFaceId.starboard: Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
-    PrismFaceId.stem: Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.3300),
-    PrismFaceId.port: Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
-    PrismFaceId.stern: Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
-  },
-  _dims165x165x270: {
-    PrismFaceId.keel: Rect.fromLTWH(0.0065, 0.0641, 0.2369, 0.2730),
-    PrismFaceId.deck: Rect.fromLTWH(0.2436, 0.0641, 0.2369, 0.2730),
-    PrismFaceId.starboard: Rect.fromLTWH(0.0065, 0.3386, 0.2369, 0.4642),
-    PrismFaceId.stem: Rect.fromLTWH(0.2436, 0.3386, 0.2369, 0.4642),
-    PrismFaceId.port: Rect.fromLTWH(0.4824, 0.3386, 0.2369, 0.4642),
-    PrismFaceId.stern: Rect.fromLTWH(0.7195, 0.3386, 0.2369, 0.4642),
-  },
-};
+final defaultPrismFaceValuesByDimensions =
+    <PrismDimensions, Map<PrismFaceId, Rect>>{
+      _dims165x165x178: {
+        PrismFaceId.keel: Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
+        PrismFaceId.deck: Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
+        PrismFaceId.starboard: Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
+        PrismFaceId.stem: Rect.fromLTWH(0.2561, 0.4100, 0.2235, 0.3300),
+        PrismFaceId.port: Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
+        PrismFaceId.stern: Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
+      },
+      _dims165x165x270: {
+        PrismFaceId.keel: Rect.fromLTWH(0.0065, 0.0641, 0.2369, 0.2730),
+        PrismFaceId.deck: Rect.fromLTWH(0.2436, 0.0641, 0.2369, 0.2730),
+        PrismFaceId.starboard: Rect.fromLTWH(0.0065, 0.3386, 0.2369, 0.4642),
+        PrismFaceId.stem: Rect.fromLTWH(0.2436, 0.3386, 0.2369, 0.4642),
+        PrismFaceId.port: Rect.fromLTWH(0.4824, 0.3386, 0.2369, 0.4642),
+        PrismFaceId.stern: Rect.fromLTWH(0.7195, 0.3386, 0.2369, 0.4642),
+      },
+    };
 
 const prismFaceDropdownLabels = <PrismFaceId, String>{
   PrismFaceId.starboard: 'Starboard',

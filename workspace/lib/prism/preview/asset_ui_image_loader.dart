@@ -25,7 +25,8 @@ class AssetUiImageLoader extends StatefulWidget {
   });
 
   final String assetPath;
-  final Widget Function(BuildContext context, AssetUiImageLoadState state) builder;
+  final Widget Function(BuildContext context, AssetUiImageLoadState state)
+  builder;
 
   @override
   State<AssetUiImageLoader> createState() => _AssetUiImageLoaderState();

@@ -42,7 +42,9 @@ class PrismFaceEditorSection extends StatelessWidget {
                     items: PrismFaceId.values.map((faceId) {
                       return DropdownMenuItem<PrismFaceId>(
                         value: faceId,
-                        child: Text(prismFaceDropdownLabels[faceId] ?? faceId.label),
+                        child: Text(
+                          prismFaceDropdownLabels[faceId] ?? faceId.label,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {

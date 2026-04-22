@@ -9,10 +9,7 @@ void main() {
     final state = PrismViewState();
 
     final changed = state.rotateByDrag(
-      DragUpdateDetails(
-        globalPosition: Offset.zero,
-        delta: Offset(10, 20),
-      ),
+      DragUpdateDetails(globalPosition: Offset.zero, delta: Offset(10, 20)),
     );
 
     expect(changed, isTrue);

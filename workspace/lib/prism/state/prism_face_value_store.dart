@@ -14,7 +14,8 @@ class PrismFaceValueStore {
           entry.key: Map<PrismFaceId, Rect>.from(entry.value),
       };
 
-  final Map<PrismDimensions, Map<PrismFaceId, Rect>> _prismFaceValuesByDimensions;
+  final Map<PrismDimensions, Map<PrismFaceId, Rect>>
+  _prismFaceValuesByDimensions;
   int _version = 0;
 
   int get version => _version;
@@ -54,12 +55,7 @@ class PrismFaceValueStore {
       minimumCropExtent,
       maxHeight,
     );
-    final nextCrop = Rect.fromLTWH(
-      nextLeft,
-      nextTop,
-      nextWidth,
-      nextHeight,
-    );
+    final nextCrop = Rect.fromLTWH(nextLeft, nextTop, nextWidth, nextHeight);
     if (current == nextCrop) return false;
     prismFaceValues[selectedFace] = nextCrop;
     _version += 1;

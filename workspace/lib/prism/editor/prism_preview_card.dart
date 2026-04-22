@@ -23,7 +23,9 @@ class PrismPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: prismPreviewHorizontalPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: prismPreviewHorizontalPadding,
+      ),
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(

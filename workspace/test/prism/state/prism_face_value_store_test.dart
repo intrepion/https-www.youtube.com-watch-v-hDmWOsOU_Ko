@@ -16,31 +16,34 @@ void main() {
     );
   });
 
-  test('updateSelectedCrop clamps crop within bounds and increments version', () {
-    final store = PrismFaceValueStore();
+  test(
+    'updateSelectedCrop clamps crop within bounds and increments version',
+    () {
+      final store = PrismFaceValueStore();
 
-    final changed = store.updateSelectedCrop(
-      dimensions: dimensions,
-      selectedFace: PrismFaceId.stem,
-      left: 0.95,
-      top: 0.98,
-      width: 0.4,
-      height: 0.4,
-    );
+      final changed = store.updateSelectedCrop(
+        dimensions: dimensions,
+        selectedFace: PrismFaceId.stem,
+        left: 0.95,
+        top: 0.98,
+        width: 0.4,
+        height: 0.4,
+      );
 
-    expect(changed, isTrue);
-    expect(store.version, 1);
+      expect(changed, isTrue);
+      expect(store.version, 1);
 
-    final crop = store.selectedCrop(
-      dimensions: dimensions,
-      selectedFace: PrismFaceId.stem,
-    );
+      final crop = store.selectedCrop(
+        dimensions: dimensions,
+        selectedFace: PrismFaceId.stem,
+      );
 
-    expect(crop.left, closeTo(0.95, 0.000001));
-    expect(crop.top, closeTo(0.98, 0.000001));
-    expect(crop.width, closeTo(0.05, 0.000001));
-    expect(crop.height, closeTo(0.05, 0.000001));
-  });
+      expect(crop.left, closeTo(0.95, 0.000001));
+      expect(crop.top, closeTo(0.98, 0.000001));
+      expect(crop.width, closeTo(0.05, 0.000001));
+      expect(crop.height, closeTo(0.05, 0.000001));
+    },
+  );
 
   test('updateSelectedCrop does not increment version when unchanged', () {
     final store = PrismFaceValueStore();

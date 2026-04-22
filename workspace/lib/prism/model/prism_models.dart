@@ -13,7 +13,8 @@ enum PrismFaceId {
   final String key;
   final String label;
 
-  bool get isTopOrBottom => this == PrismFaceId.deck || this == PrismFaceId.keel;
+  bool get isTopOrBottom =>
+      this == PrismFaceId.deck || this == PrismFaceId.keel;
 
   static PrismFaceId? tryParse(String key) {
     for (final faceId in PrismFaceId.values) {

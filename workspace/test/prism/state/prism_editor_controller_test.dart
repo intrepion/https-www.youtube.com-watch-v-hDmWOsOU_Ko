@@ -23,7 +23,10 @@ void main() {
 
     expect(snapshot.selectedImageOption, prismImageOptions.last);
     expect(snapshot.dimensions, prismImageOptions.last.dimensions);
-    expect(snapshot.selectedCrop, snapshot.activePrismFaceValues[PrismFaceId.port]);
+    expect(
+      snapshot.selectedCrop,
+      snapshot.activePrismFaceValues[PrismFaceId.port],
+    );
   });
 
   test('setFace updates selected face with typed ids', () {
