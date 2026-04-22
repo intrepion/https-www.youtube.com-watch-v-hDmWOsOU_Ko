@@ -4,6 +4,33 @@ import 'package:flutter/material.dart';
 
 import '../prism_config.dart';
 
+class _PrismSliderSpec {
+  const _PrismSliderSpec({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+    required this.valueText,
+  });
+
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+  final String valueText;
+}
+
+String _formatAngle(double radians) {
+  final degrees = radians * 180 / pi;
+  return '${radians.toStringAsFixed(2)} rad (${degrees.toStringAsFixed(1)} deg)';
+}
+
+String _formatZoom(double value) => '${value.toStringAsFixed(2)}x';
+
+String _formatCropValue(double value) => value.toStringAsFixed(4);
+
 class PrismSliderControl extends StatelessWidget {
   const PrismSliderControl({
     super.key,
@@ -37,6 +64,30 @@ class PrismSliderControl extends StatelessWidget {
   }
 }
 
+class _PrismSliderGroup extends StatelessWidget {
+  const _PrismSliderGroup({required this.specs});
+
+  final List<_PrismSliderSpec> specs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: specs
+          .map(
+            (spec) => PrismSliderControl(
+              label: spec.label,
+              valueText: spec.valueText,
+              value: spec.value,
+              min: spec.min,
+              max: spec.max,
+              onChanged: spec.onChanged,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 class PrismRotationControls extends StatelessWidget {
   const PrismRotationControls({
     super.key,
@@ -59,18 +110,11 @@ class PrismRotationControls extends StatelessWidget {
   final ValueChanged<double> onRzChanged;
   final ValueChanged<double> onZoomChanged;
 
-  String _formatAngle(double radians) {
-    final degrees = radians * 180 / pi;
-    return '${radians.toStringAsFixed(2)} rad (${degrees.toStringAsFixed(1)} deg)';
-  }
-
-  String _formatZoom(double value) => '${value.toStringAsFixed(2)}x';
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        PrismSliderControl(
+    return _PrismSliderGroup(
+      specs: [
+        _PrismSliderSpec(
           label: 'X',
           valueText: _formatAngle(rx),
           value: rx,
@@ -78,7 +122,7 @@ class PrismRotationControls extends StatelessWidget {
           max: pi * 2,
           onChanged: onRxChanged,
         ),
-        PrismSliderControl(
+        _PrismSliderSpec(
           label: 'Y',
           valueText: _formatAngle(ry),
           value: ry,
@@ -86,7 +130,7 @@ class PrismRotationControls extends StatelessWidget {
           max: pi * 2,
           onChanged: onRyChanged,
         ),
-        PrismSliderControl(
+        _PrismSliderSpec(
           label: 'Z',
           valueText: _formatAngle(rz),
           value: rz,
@@ -94,7 +138,7 @@ class PrismRotationControls extends StatelessWidget {
           max: pi * 2,
           onChanged: onRzChanged,
         ),
-        PrismSliderControl(
+        _PrismSliderSpec(
           label: 'Zoom',
           valueText: _formatZoom(zoom),
           value: zoom,
@@ -123,13 +167,11 @@ class PrismFaceCropControls extends StatelessWidget {
   final ValueChanged<double> onWidthChanged;
   final ValueChanged<double> onHeightChanged;
 
-  String _formatCropValue(double value) => value.toStringAsFixed(4);
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        PrismSliderControl(
+    return _PrismSliderGroup(
+      specs: [
+        _PrismSliderSpec(
           label: 'Left',
           valueText: _formatCropValue(crop.left),
           value: crop.left,
@@ -137,7 +179,7 @@ class PrismFaceCropControls extends StatelessWidget {
           max: 1.0,
           onChanged: onLeftChanged,
         ),
-        PrismSliderControl(
+        _PrismSliderSpec(
           label: 'Top',
           valueText: _formatCropValue(crop.top),
           value: crop.top,
@@ -145,7 +187,7 @@ class PrismFaceCropControls extends StatelessWidget {
           max: 1.0,
           onChanged: onTopChanged,
         ),
-        PrismSliderControl(
+        _PrismSliderSpec(
           label: 'Width',
           valueText: _formatCropValue(crop.width),
           value: crop.width,
@@ -153,7 +195,7 @@ class PrismFaceCropControls extends StatelessWidget {
           max: 1.0,
           onChanged: onWidthChanged,
         ),
-        PrismSliderControl(
+        _PrismSliderSpec(
           label: 'Height',
           valueText: _formatCropValue(crop.height),
           value: crop.height,
