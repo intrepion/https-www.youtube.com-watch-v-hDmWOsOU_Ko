@@ -14,6 +14,13 @@ enum PrismFaceId {
   final String label;
 
   bool get isTopOrBottom => this == PrismFaceId.deck || this == PrismFaceId.keel;
+
+  static PrismFaceId? tryParse(String key) {
+    for (final faceId in PrismFaceId.values) {
+      if (faceId.key == key) return faceId;
+    }
+    return null;
+  }
 }
 
 class PrismDimensions {
@@ -52,11 +59,12 @@ class PrismImageOption {
     required this.assetPath,
     required this.dimensions,
     required this.name,
+    required this.extension,
   });
 
   factory PrismImageOption.fromAssetPath(String assetPath) {
     final match = RegExp(
-      r'^assets/scentsy-box-(\d+)x(\d+)x(\d+)-(.+)\.png$',
+      r'^assets/scentsy-box-(\d+)x(\d+)x(\d+)-(.+)\.([A-Za-z0-9]+)$',
     ).firstMatch(assetPath);
     if (match == null) {
       throw ArgumentError.value(
@@ -70,17 +78,20 @@ class PrismImageOption {
     final depth = int.parse(match.group(2)!);
     final height = int.parse(match.group(3)!);
     final rawName = match.group(4)!;
+    final extension = match.group(5)!;
 
     return PrismImageOption(
       assetPath: assetPath,
       dimensions: PrismDimensions(width: width, depth: depth, height: height),
       name: rawName,
+      extension: extension,
     );
   }
 
   final String assetPath;
   final PrismDimensions dimensions;
   final String name;
+  final String extension;
 
   String get label => '${_titleCaseWords(name)} (${dimensions.key})';
 
@@ -90,11 +101,12 @@ class PrismImageOption {
     return other is PrismImageOption &&
         other.assetPath == assetPath &&
         other.dimensions == dimensions &&
-        other.name == name;
+        other.name == name &&
+        other.extension == extension;
   }
 
   @override
-  int get hashCode => Object.hash(assetPath, dimensions, name);
+  int get hashCode => Object.hash(assetPath, dimensions, name, extension);
 
   @override
   String toString() => 'PrismImageOption($assetPath)';

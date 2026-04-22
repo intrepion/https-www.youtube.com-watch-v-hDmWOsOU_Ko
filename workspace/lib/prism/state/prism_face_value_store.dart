@@ -13,10 +13,13 @@ class PrismFaceValueStore {
           entry.key: Map<PrismFaceId, Rect>.from(entry.value),
       };
 
-  final Map<String, Map<PrismFaceId, Rect>> _prismFaceValuesByDimensions;
+  final Map<PrismDimensions, Map<PrismFaceId, Rect>> _prismFaceValuesByDimensions;
+  int _version = 0;
+
+  int get version => _version;
 
   Map<PrismFaceId, Rect> faceValuesFor(PrismDimensions dimensions) =>
-      _prismFaceValuesByDimensions[dimensions.key]!;
+      _prismFaceValuesByDimensions[dimensions]!;
 
   Rect selectedCrop({
     required PrismDimensions dimensions,
@@ -55,6 +58,7 @@ class PrismFaceValueStore {
     );
     if (current == nextCrop) return false;
     prismFaceValues[selectedFace] = nextCrop;
+    _version += 1;
     return true;
   }
 }

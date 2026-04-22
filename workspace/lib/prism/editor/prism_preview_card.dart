@@ -10,12 +10,14 @@ class PrismPreviewCard extends StatelessWidget {
     required this.prismFaceValues,
     required this.selectedFace,
     required this.showFaceOverlays,
+    required this.faceValuesVersion,
   });
 
   final String imageAssetPath;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
+  final int faceValuesVersion;
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +39,10 @@ class PrismPreviewCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: PrismImagePreview(
               imageAssetPath: imageAssetPath,
-              prismFaceValues: Map<PrismFaceId, Rect>.from(prismFaceValues),
+              prismFaceValues: prismFaceValues,
               selectedFace: selectedFace,
               showFaceOverlays: showFaceOverlays,
+              faceValuesVersion: faceValuesVersion,
             ),
           ),
         ),

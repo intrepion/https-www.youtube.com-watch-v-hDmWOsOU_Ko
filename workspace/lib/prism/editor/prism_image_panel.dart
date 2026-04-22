@@ -14,6 +14,7 @@ class PrismImagePanel extends StatelessWidget {
     required this.prismFaceValues,
     required this.selectedFace,
     required this.showFaceOverlays,
+    required this.faceValuesVersion,
     required this.onImageChanged,
     required this.onFaceChanged,
     required this.onShowFaceOverlaysChanged,
@@ -25,6 +26,7 @@ class PrismImagePanel extends StatelessWidget {
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
+  final int faceValuesVersion;
   final ValueChanged<String> onImageChanged;
   final ValueChanged<PrismFaceId> onFaceChanged;
   final ValueChanged<bool> onShowFaceOverlaysChanged;
@@ -47,6 +49,7 @@ class PrismImagePanel extends StatelessWidget {
             prismFaceValues: prismFaceValues,
             selectedFace: selectedFace,
             showFaceOverlays: showFaceOverlays,
+            faceValuesVersion: faceValuesVersion,
           ),
           const SizedBox(height: 16),
           PrismFaceEditorSection(

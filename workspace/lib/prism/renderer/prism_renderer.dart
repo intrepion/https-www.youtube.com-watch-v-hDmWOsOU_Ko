@@ -49,16 +49,38 @@ class PrismRenderer {
   }
 
   Widget _buildFace(PrismFaceId faceId) {
-    final crop = prismFaceValues[faceId];
-    assert(crop != null, 'Missing face values for "${faceId.key}".');
     final size = switch (faceId) {
       PrismFaceId.deck || PrismFaceId.keel => dimensions.topFaceSize,
       _ => dimensions.sideFaceSize,
     };
+    final crop = prismFaceValues[faceId];
+
+    if (crop == null) {
+      return _buildMissingFaceFallback(faceId, size);
+    }
 
     return PrismFace(
       image: image,
-      spec: PrismFaceSpec(faceId: faceId, size: size, crop: crop!),
+      spec: PrismFaceSpec(faceId: faceId, size: size, crop: crop),
+    );
+  }
+
+  Widget _buildMissingFaceFallback(PrismFaceId faceId, Size size) {
+    return SizedBox(
+      width: size.width,
+      height: size.height,
+      child: ColoredBox(
+        color: Colors.black12,
+        child: Center(
+          child: Text(
+            faceId.label,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

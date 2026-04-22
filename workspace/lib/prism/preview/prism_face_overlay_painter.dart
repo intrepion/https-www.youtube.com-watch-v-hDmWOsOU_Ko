@@ -9,10 +9,12 @@ class PrismFaceOverlayPainter extends CustomPainter {
   const PrismFaceOverlayPainter({
     required this.prismFaceValues,
     required this.selectedFace,
+    required this.faceValuesVersion,
   });
 
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
+  final int faceValuesVersion;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -59,6 +61,7 @@ class PrismFaceOverlayPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant PrismFaceOverlayPainter oldDelegate) {
     return oldDelegate.selectedFace != selectedFace ||
-        oldDelegate.prismFaceValues != prismFaceValues;
+        oldDelegate.faceValuesVersion != faceValuesVersion ||
+        !identical(oldDelegate.prismFaceValues, prismFaceValues);
   }
 }

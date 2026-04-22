@@ -29,8 +29,17 @@ class RectangularPrism extends StatelessWidget {
   Widget build(BuildContext context) {
     return AssetUiImageLoader(
       assetPath: imageAssetPath,
-      builder: (context, prismImage) {
-        if (prismImage == null) {
+      builder: (context, loadState) {
+        if (loadState.hasError) {
+          return SizedBox(
+            width: dimensions.width.toDouble(),
+            height: dimensions.height.toDouble(),
+            child: const Center(child: Text('Image failed to load')),
+          );
+        }
+
+        final prismImage = loadState.image;
+        if (loadState.isLoading || prismImage == null) {
           return SizedBox(
             width: dimensions.width.toDouble(),
             height: dimensions.height.toDouble(),

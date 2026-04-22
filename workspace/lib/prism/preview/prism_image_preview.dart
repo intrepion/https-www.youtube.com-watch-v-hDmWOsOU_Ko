@@ -13,19 +13,30 @@ class PrismImagePreview extends StatelessWidget {
     required this.prismFaceValues,
     required this.selectedFace,
     required this.showFaceOverlays,
+    required this.faceValuesVersion,
   });
 
   final String imageAssetPath;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
+  final int faceValuesVersion;
 
   @override
   Widget build(BuildContext context) {
     return AssetUiImageLoader(
       assetPath: imageAssetPath,
-      builder: (context, previewImage) {
-        if (previewImage == null) {
+      builder: (context, loadState) {
+        if (loadState.hasError) {
+          return const SizedBox(
+            width: 240,
+            height: 240,
+            child: Center(child: Text('Image failed to load')),
+          );
+        }
+
+        final previewImage = loadState.image;
+        if (loadState.isLoading || previewImage == null) {
           return const SizedBox(
             width: 240,
             height: 240,
@@ -42,6 +53,7 @@ class PrismImagePreview extends StatelessWidget {
                   ? PrismFaceOverlayPainter(
                       prismFaceValues: prismFaceValues,
                       selectedFace: selectedFace,
+                      faceValuesVersion: faceValuesVersion,
                     )
                   : null,
               child: Image.asset(imageAssetPath, fit: BoxFit.fill),

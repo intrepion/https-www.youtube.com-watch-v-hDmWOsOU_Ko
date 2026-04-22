@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../model/prism_models.dart';
 
-const defaultPrismFaceValuesByDimensions = <String, Map<PrismFaceId, Rect>>{
-  '165x165x178': {
+const _dims165x165x178 = PrismDimensions(width: 165, depth: 165, height: 178);
+const _dims165x165x270 = PrismDimensions(width: 165, depth: 165, height: 270);
+
+final defaultPrismFaceValuesByDimensions = <PrismDimensions, Map<PrismFaceId, Rect>>{
+  _dims165x165x178: {
     PrismFaceId.keel: Rect.fromLTWH(0.0336, 0.0800, 0.2235, 0.3100),
     PrismFaceId.deck: Rect.fromLTWH(0.2561, 0.0800, 0.2235, 0.3100),
     PrismFaceId.starboard: Rect.fromLTWH(0.0336, 0.4100, 0.2235, 0.3300),
@@ -11,7 +14,7 @@ const defaultPrismFaceValuesByDimensions = <String, Map<PrismFaceId, Rect>>{
     PrismFaceId.port: Rect.fromLTWH(0.4796, 0.4100, 0.2235, 0.3300),
     PrismFaceId.stern: Rect.fromLTWH(0.7027, 0.4100, 0.2235, 0.3300),
   },
-  '165x165x270': {
+  _dims165x165x270: {
     PrismFaceId.keel: Rect.fromLTWH(0.0065, 0.0641, 0.2369, 0.2730),
     PrismFaceId.deck: Rect.fromLTWH(0.2436, 0.0641, 0.2369, 0.2730),
     PrismFaceId.starboard: Rect.fromLTWH(0.0065, 0.3386, 0.2369, 0.4642),

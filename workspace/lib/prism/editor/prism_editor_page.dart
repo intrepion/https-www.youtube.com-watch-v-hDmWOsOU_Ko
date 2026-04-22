@@ -48,6 +48,7 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
       prismFaceValues: _controller.activePrismFaceValues,
       selectedFace: _controller.selectedFace,
       showFaceOverlays: _controller.showFaceOverlays,
+      faceValuesVersion: _controller.cropVersion,
       onImageChanged: _controller.setImage,
       onFaceChanged: _controller.setFace,
       onShowFaceOverlaysChanged: _controller.setShowFaceOverlays,

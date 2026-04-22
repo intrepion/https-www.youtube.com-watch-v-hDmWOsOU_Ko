@@ -46,9 +46,9 @@ class PrismFaceEditorSection extends StatelessWidget {
                     }).toList(),
                     onChanged: (value) {
                       if (value == null) return;
-                      onFaceChanged(
-                        PrismFaceId.values.firstWhere((faceId) => faceId.key == value),
-                      );
+                      final faceId = PrismFaceId.tryParse(value);
+                      if (faceId == null) return;
+                      onFaceChanged(faceId);
                     },
                   ),
                 ),
