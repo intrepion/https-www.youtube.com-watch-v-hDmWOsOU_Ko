@@ -34,21 +34,20 @@ class PrismFaceEditorSection extends StatelessWidget {
                     labelText: 'Face',
                     border: OutlineInputBorder(),
                   ),
-                  child: DropdownButton<String>(
-                    value: selectedFace.key,
+                  child: DropdownButton<PrismFaceId>(
+                    key: const ValueKey('face-dropdown'),
+                    value: selectedFace,
                     isExpanded: true,
                     underline: const SizedBox.shrink(),
                     items: PrismFaceId.values.map((faceId) {
-                      return DropdownMenuItem<String>(
-                        value: faceId.key,
+                      return DropdownMenuItem<PrismFaceId>(
+                        value: faceId,
                         child: Text(prismFaceDropdownLabels[faceId] ?? faceId.label),
                       );
                     }).toList(),
                     onChanged: (value) {
                       if (value == null) return;
-                      final faceId = PrismFaceId.tryParse(value);
-                      if (faceId == null) return;
-                      onFaceChanged(faceId);
+                      onFaceChanged(value);
                     },
                   ),
                 ),
@@ -57,6 +56,7 @@ class PrismFaceEditorSection extends StatelessWidget {
               SizedBox(
                 width: 170,
                 child: SwitchListTile(
+                  key: const ValueKey('show-face-overlays-switch'),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                   title: const Text('Overlays'),
                   value: showFaceOverlays,

@@ -13,8 +13,7 @@ class RectangularPrism extends StatelessWidget {
     required this.ry,
     required this.rz,
     required this.zoom,
-    required this.imageAssetPath,
-    required this.dimensions,
+    required this.imageOption,
     required this.prismFaceValues,
   });
 
@@ -22,14 +21,14 @@ class RectangularPrism extends StatelessWidget {
   final double ry;
   final double rz;
   final double zoom;
-  final String imageAssetPath;
-  final PrismDimensions dimensions;
+  final PrismImageOption imageOption;
   final Map<PrismFaceId, Rect> prismFaceValues;
 
   @override
   Widget build(BuildContext context) {
+    final dimensions = imageOption.dimensions;
     return AssetUiImageLoader(
-      assetPath: imageAssetPath,
+      assetPath: imageOption.assetPath,
       builder: (context, loadState) {
         if (loadState.hasError) {
           return AssetLoadPlaceholder.error(

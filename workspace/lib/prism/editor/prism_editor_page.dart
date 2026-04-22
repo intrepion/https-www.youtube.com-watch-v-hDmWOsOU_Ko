@@ -4,6 +4,7 @@ import '../config/prism_image_catalog.dart';
 import '../controls/prism_face_crop_controls.dart';
 import '../controls/prism_rotation_controls.dart';
 import '../state/prism_editor_controller.dart';
+import '../state/prism_editor_snapshot.dart';
 import 'prism_editor_layout.dart';
 import 'prism_image_panel.dart';
 import 'prism_viewport_panel.dart';
@@ -18,12 +19,12 @@ class PrismEditorPage extends StatefulWidget {
 class _PrismEditorPageState extends State<PrismEditorPage> {
   late final PrismEditorController _controller = PrismEditorController();
 
-  PrismRotationControls _buildPrismControls() {
+  PrismRotationControls _buildPrismControls(PrismEditorSnapshot snapshot) {
     return PrismRotationControls(
-      rx: _controller.rx,
-      ry: _controller.ry,
-      rz: _controller.rz,
-      zoom: _controller.zoom,
+      rx: snapshot.rx,
+      ry: snapshot.ry,
+      rz: snapshot.rz,
+      zoom: snapshot.zoom,
       onRxChanged: _controller.setRx,
       onRyChanged: _controller.setRy,
       onRzChanged: _controller.setRz,
@@ -31,9 +32,9 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
     );
   }
 
-  PrismFaceCropControls _buildFaceControls() {
+  PrismFaceCropControls _buildFaceControls(PrismEditorSnapshot snapshot) {
     return PrismFaceCropControls(
-      crop: _controller.selectedCrop,
+      crop: snapshot.selectedCrop,
       onLeftChanged: (value) => _controller.updateSelectedCrop(left: value),
       onTopChanged: (value) => _controller.updateSelectedCrop(top: value),
       onWidthChanged: (value) => _controller.updateSelectedCrop(width: value),
@@ -41,31 +42,30 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
     );
   }
 
-  Widget _buildImagePanel() {
+  Widget _buildImagePanel(PrismEditorSnapshot snapshot) {
     return PrismImagePanel(
-      selectedImageAssetPath: _controller.selectedImageAssetPath,
+      selectedImageOption: snapshot.selectedImageOption,
       imageOptions: prismImageOptions,
-      prismFaceValues: _controller.activePrismFaceValues,
-      selectedFace: _controller.selectedFace,
-      showFaceOverlays: _controller.showFaceOverlays,
-      faceValuesVersion: _controller.cropVersion,
+      prismFaceValues: snapshot.activePrismFaceValues,
+      selectedFace: snapshot.selectedFace,
+      showFaceOverlays: snapshot.showFaceOverlays,
+      faceValuesVersion: snapshot.cropVersion,
       onImageChanged: _controller.setImage,
       onFaceChanged: _controller.setFace,
       onShowFaceOverlaysChanged: _controller.setShowFaceOverlays,
-      faceControls: _buildFaceControls(),
+      faceControls: _buildFaceControls(snapshot),
     );
   }
 
-  Widget _buildPrismPanel() {
+  Widget _buildPrismPanel(PrismEditorSnapshot snapshot) {
     return PrismViewportPanel(
-      rx: _controller.rx,
-      ry: _controller.ry,
-      rz: _controller.rz,
-      zoom: _controller.zoom,
-      imageAssetPath: _controller.selectedImageAssetPath,
-      dimensions: _controller.selectedImageOption.dimensions,
-      prismFaceValues: _controller.activePrismFaceValues,
-      rotationControls: _buildPrismControls(),
+      rx: snapshot.rx,
+      ry: snapshot.ry,
+      rz: snapshot.rz,
+      zoom: snapshot.zoom,
+      imageOption: snapshot.selectedImageOption,
+      prismFaceValues: snapshot.activePrismFaceValues,
+      rotationControls: _buildPrismControls(snapshot),
     );
   }
 
@@ -80,13 +80,14 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
+        final snapshot = _controller.snapshot;
         return GestureDetector(
           onPanUpdate: _controller.rotateByDrag,
           child: Scaffold(
             body: SafeArea(
               child: PrismEditorLayout(
-                imagePanel: _buildImagePanel(),
-                prismPanel: _buildPrismPanel(),
+                imagePanel: _buildImagePanel(snapshot),
+                prismPanel: _buildPrismPanel(snapshot),
               ),
             ),
           ),

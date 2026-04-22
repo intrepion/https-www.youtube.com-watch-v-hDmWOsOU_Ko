@@ -12,8 +12,7 @@ class PrismViewportPanel extends StatelessWidget {
     required this.ry,
     required this.rz,
     required this.zoom,
-    required this.imageAssetPath,
-    required this.dimensions,
+    required this.imageOption,
     required this.prismFaceValues,
     required this.rotationControls,
   });
@@ -22,8 +21,7 @@ class PrismViewportPanel extends StatelessWidget {
   final double ry;
   final double rz;
   final double zoom;
-  final String imageAssetPath;
-  final PrismDimensions dimensions;
+  final PrismImageOption imageOption;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismRotationControls rotationControls;
 
@@ -61,8 +59,7 @@ class PrismViewportPanel extends StatelessWidget {
                           ry: ry,
                           rz: rz,
                           zoom: zoom,
-                          imageAssetPath: imageAssetPath,
-                          dimensions: dimensions,
+                          imageOption: imageOption,
                           prismFaceValues: prismFaceValues,
                         ),
                       ),

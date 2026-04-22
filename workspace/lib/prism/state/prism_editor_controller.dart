@@ -2,42 +2,27 @@ import 'package:flutter/material.dart';
 
 import '../config/prism_image_catalog.dart';
 import '../model/prism_models.dart';
+import 'prism_editor_snapshot.dart';
 import 'prism_face_value_store.dart';
 import 'prism_view_state.dart';
 
 class PrismEditorController extends ChangeNotifier {
   bool _showFaceOverlays = false;
-  String _selectedImageAssetPath = prismImageAssetPaths.first;
+  PrismImageOption _selectedImageOption = _initialSelectedImageOption();
   PrismFaceId _selectedFace = PrismFaceId.stem;
 
   final PrismFaceValueStore _faceValueStore = PrismFaceValueStore();
   final PrismViewState _viewState = PrismViewState();
 
   bool get showFaceOverlays => _showFaceOverlays;
-  String get selectedImageAssetPath => selectedImageOption.assetPath;
+  String get selectedImageAssetPath => _selectedImageOption.assetPath;
   PrismFaceId get selectedFace => _selectedFace;
   int get cropVersion => _faceValueStore.version;
   double get rx => _viewState.rx;
   double get ry => _viewState.ry;
   double get rz => _viewState.rz;
   double get zoom => _viewState.zoom;
-
-  PrismImageOption? _findImageOption(String assetPath) {
-    for (final option in prismImageOptions) {
-      if (option.assetPath == assetPath) return option;
-    }
-    return null;
-  }
-
-  PrismImageOption get _fallbackImageOption {
-    if (prismImageOptions.isEmpty) {
-      throw StateError('No prism image options configured.');
-    }
-    return prismImageOptions.first;
-  }
-
-  PrismImageOption get selectedImageOption =>
-      _findImageOption(_selectedImageAssetPath) ?? _fallbackImageOption;
+  PrismImageOption get selectedImageOption => _selectedImageOption;
 
   Map<PrismFaceId, Rect> get activePrismFaceValues =>
       _faceValueStore.faceValuesFor(selectedImageOption.dimensions);
@@ -45,6 +30,24 @@ class PrismEditorController extends ChangeNotifier {
   Rect get selectedCrop => _faceValueStore.selectedCrop(
     dimensions: selectedImageOption.dimensions,
     selectedFace: _selectedFace,
+  );
+
+  PrismEditorSnapshot get snapshot => PrismEditorSnapshot(
+    selectedImageOption: _selectedImageOption,
+    selectedFace: _selectedFace,
+    showFaceOverlays: _showFaceOverlays,
+    cropVersion: _faceValueStore.version,
+    rx: _viewState.rx,
+    ry: _viewState.ry,
+    rz: _viewState.rz,
+    zoom: _viewState.zoom,
+    activePrismFaceValues: _faceValueStore.faceValuesFor(
+      _selectedImageOption.dimensions,
+    ),
+    selectedCrop: _faceValueStore.selectedCrop(
+      dimensions: _selectedImageOption.dimensions,
+      selectedFace: _selectedFace,
+    ),
   );
 
   void _setValue<T>(T current, T next, void Function(T value) assign) {
@@ -57,11 +60,9 @@ class PrismEditorController extends ChangeNotifier {
     if (changed) notifyListeners();
   }
 
-  void setImage(String value) {
-    final option = _findImageOption(value);
-    if (option == null) return;
-    _setValue(_selectedImageAssetPath, option.assetPath, (next) {
-      _selectedImageAssetPath = next;
+  void setImage(PrismImageOption value) {
+    _setValue(_selectedImageOption, value, (next) {
+      _selectedImageOption = next;
     });
   }
 
@@ -114,4 +115,11 @@ class PrismEditorController extends ChangeNotifier {
       ),
     );
   }
+}
+
+PrismImageOption _initialSelectedImageOption() {
+  if (prismImageOptions.isEmpty) {
+    throw StateError('No prism image options configured.');
+  }
+  return prismImageOptions.first;
 }

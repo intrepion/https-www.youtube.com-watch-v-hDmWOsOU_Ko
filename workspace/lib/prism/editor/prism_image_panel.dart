@@ -10,7 +10,7 @@ import 'prism_preview_card.dart';
 class PrismImagePanel extends StatelessWidget {
   const PrismImagePanel({
     super.key,
-    required this.selectedImageAssetPath,
+    required this.selectedImageOption,
     required this.imageOptions,
     required this.prismFaceValues,
     required this.selectedFace,
@@ -22,13 +22,13 @@ class PrismImagePanel extends StatelessWidget {
     required this.faceControls,
   });
 
-  final String selectedImageAssetPath;
+  final PrismImageOption selectedImageOption;
   final List<PrismImageOption> imageOptions;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
   final int faceValuesVersion;
-  final ValueChanged<String> onImageChanged;
+  final ValueChanged<PrismImageOption> onImageChanged;
   final ValueChanged<PrismFaceId> onFaceChanged;
   final ValueChanged<bool> onShowFaceOverlaysChanged;
   final PrismFaceCropControls faceControls;
@@ -45,13 +45,13 @@ class PrismImagePanel extends StatelessWidget {
       child: Column(
         children: [
           PrismImageSelector(
-            selectedImageAssetPath: selectedImageAssetPath,
+            selectedImageOption: selectedImageOption,
             imageOptions: imageOptions,
             onImageChanged: onImageChanged,
           ),
           const SizedBox(height: prismEditorSectionSpacing),
           PrismPreviewCard(
-            imageAssetPath: selectedImageAssetPath,
+            imageOption: selectedImageOption,
             prismFaceValues: prismFaceValues,
             selectedFace: selectedFace,
             showFaceOverlays: showFaceOverlays,

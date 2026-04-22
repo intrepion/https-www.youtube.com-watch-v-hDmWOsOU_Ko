@@ -7,14 +7,14 @@ import '../preview/prism_image_preview.dart';
 class PrismPreviewCard extends StatelessWidget {
   const PrismPreviewCard({
     super.key,
-    required this.imageAssetPath,
+    required this.imageOption,
     required this.prismFaceValues,
     required this.selectedFace,
     required this.showFaceOverlays,
     required this.faceValuesVersion,
   });
 
-  final String imageAssetPath;
+  final PrismImageOption imageOption;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
@@ -41,12 +41,14 @@ class PrismPreviewCard extends StatelessWidget {
           maxScale: prismPreviewMaxScale,
           child: Padding(
             padding: const EdgeInsets.all(prismPreviewInnerPadding),
-            child: PrismImagePreview(
-              imageAssetPath: imageAssetPath,
-              prismFaceValues: prismFaceValues,
-              selectedFace: selectedFace,
-              showFaceOverlays: showFaceOverlays,
-              faceValuesVersion: faceValuesVersion,
+            child: RepaintBoundary(
+              child: PrismImagePreview(
+                imageOption: imageOption,
+                prismFaceValues: prismFaceValues,
+                selectedFace: selectedFace,
+                showFaceOverlays: showFaceOverlays,
+                faceValuesVersion: faceValuesVersion,
+              ),
             ),
           ),
         ),

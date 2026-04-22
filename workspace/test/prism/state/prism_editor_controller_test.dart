@@ -4,23 +4,26 @@ import 'package:hello_world/prism/model/prism_models.dart';
 import 'package:hello_world/prism/state/prism_editor_controller.dart';
 
 void main() {
-  test('setImage ignores unknown asset paths', () {
+  test('setImage updates the selected option with a typed image value', () {
     final controller = PrismEditorController();
-    final before = controller.selectedImageAssetPath;
 
-    controller.setImage('assets/does-not-exist.png');
+    controller.setImage(prismImageOptions.last);
 
-    expect(controller.selectedImageAssetPath, before);
+    expect(controller.selectedImageOption, prismImageOptions.last);
   });
 
-  test('selectedImageOption falls back to a configured option', () {
+  test('snapshot keeps the selected image dimensions and crop in sync', () {
     final controller = PrismEditorController();
 
     controller
-      ..setImage(prismImageOptions.last.assetPath)
-      ..setImage('assets/does-not-exist.png');
+      ..setImage(prismImageOptions.last)
+      ..setFace(PrismFaceId.port);
 
-    expect(controller.selectedImageOption.assetPath, prismImageOptions.last.assetPath);
+    final snapshot = controller.snapshot;
+
+    expect(snapshot.selectedImageOption, prismImageOptions.last);
+    expect(snapshot.dimensions, prismImageOptions.last.dimensions);
+    expect(snapshot.selectedCrop, snapshot.activePrismFaceValues[PrismFaceId.port]);
   });
 
   test('setFace updates selected face with typed ids', () {

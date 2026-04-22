@@ -11,14 +11,14 @@ import 'prism_face_overlay_painter.dart';
 class PrismImagePreview extends StatelessWidget {
   const PrismImagePreview({
     super.key,
-    required this.imageAssetPath,
+    required this.imageOption,
     required this.prismFaceValues,
     required this.selectedFace,
     required this.showFaceOverlays,
     required this.faceValuesVersion,
   });
 
-  final String imageAssetPath;
+  final PrismImageOption imageOption;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
@@ -27,7 +27,7 @@ class PrismImagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AssetUiImageLoader(
-      assetPath: imageAssetPath,
+      assetPath: imageOption.assetPath,
       builder: (context, loadState) {
         if (loadState.hasError) {
           return const AssetLoadPlaceholder.error(
@@ -56,7 +56,7 @@ class PrismImagePreview extends StatelessWidget {
                       faceValuesVersion: faceValuesVersion,
                     )
                   : null,
-              child: Image.asset(imageAssetPath, fit: BoxFit.fill),
+              child: Image.asset(imageOption.assetPath, fit: BoxFit.fill),
             ),
           ),
         );
