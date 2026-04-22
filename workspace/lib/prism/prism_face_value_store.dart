@@ -1,0 +1,58 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+
+import 'prism_config.dart';
+
+class PrismFaceValueStore {
+  PrismFaceValueStore()
+    : _prismFaceValuesByDimensions = {
+        for (final entry in defaultPrismFaceValuesByDimensions.entries)
+          entry.key: Map<String, Rect>.from(entry.value),
+      };
+
+  final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions;
+
+  Map<String, Rect> faceValuesFor(PrismDimensions dimensions) =>
+      _prismFaceValuesByDimensions[dimensions.key]!;
+
+  Rect selectedCrop({
+    required PrismDimensions dimensions,
+    required String selectedFace,
+  }) {
+    return faceValuesFor(dimensions)[selectedFace]!;
+  }
+
+  bool updateSelectedCrop({
+    required PrismDimensions dimensions,
+    required String selectedFace,
+    double? left,
+    double? top,
+    double? width,
+    double? height,
+  }) {
+    final prismFaceValues = faceValuesFor(dimensions);
+    final current = prismFaceValues[selectedFace]!;
+    final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
+    final nextTop = (top ?? current.top).clamp(0.0, 1.0);
+    final maxWidth = max(minimumCropExtent, 1.0 - nextLeft);
+    final maxHeight = max(minimumCropExtent, 1.0 - nextTop);
+    final nextWidth = (width ?? current.width).clamp(
+      minimumCropExtent,
+      maxWidth,
+    );
+    final nextHeight = (height ?? current.height).clamp(
+      minimumCropExtent,
+      maxHeight,
+    );
+    final nextCrop = Rect.fromLTWH(
+      nextLeft,
+      nextTop,
+      nextWidth,
+      nextHeight,
+    );
+    if (current == nextCrop) return false;
+    prismFaceValues[selectedFace] = nextCrop;
+    return true;
+  }
+}

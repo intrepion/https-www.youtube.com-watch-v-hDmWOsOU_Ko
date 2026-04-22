@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:vector_math/vector_math_64.dart' as vm;
 
 import '../prism_config.dart';
 import 'prism_face.dart';
+import 'prism_face_placements.dart';
 
 class OrderedPrismFace {
   const OrderedPrismFace({
@@ -31,54 +31,9 @@ class PrismRenderer {
   final Map<String, Rect> prismFaceValues;
 
   List<OrderedPrismFace> orderedFaces(Matrix4 rotation) {
-    final halfWidth = dimensions.topFaceSize.width / 2;
-    final halfDepth = dimensions.topFaceSize.height / 2;
-    final halfHeight = dimensions.sideFaceSize.height / 2;
     final faces = <OrderedPrismFace>[];
 
-    for (final face in [
-      _PrismFacePlacement(
-        label: 'stern',
-        center: vm.Vector3(0.0, 0.0, halfDepth),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, halfDepth, 1.0)
-          ..rotateY(pi),
-      ),
-      _PrismFacePlacement(
-        label: 'keel',
-        center: vm.Vector3(0.0, halfHeight, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, halfHeight, 0.0, 1.0)
-          ..rotateX(pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'starboard',
-        center: vm.Vector3(-halfWidth, 0.0, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(-halfWidth, 0.0, 0.0, 1.0)
-          ..rotateY(pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'port',
-        center: vm.Vector3(halfWidth, 0.0, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(halfWidth, 0.0, 0.0, 1.0)
-          ..rotateY(-pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'deck',
-        center: vm.Vector3(0.0, -halfHeight, 0.0),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, -halfHeight, 0.0, 1.0)
-          ..rotateX(-pi / 2),
-      ),
-      _PrismFacePlacement(
-        label: 'stem',
-        center: vm.Vector3(0.0, 0.0, -halfDepth),
-        transform: Matrix4.identity()
-          ..translateByDouble(0.0, 0.0, -halfDepth, 1.0),
-      ),
-    ]) {
+    for (final face in buildPrismFacePlacements(dimensions)) {
       final rotatedCenter = rotation.transform3(vm.Vector3.copy(face.center));
       faces.add(
         OrderedPrismFace(
@@ -106,16 +61,4 @@ class PrismRenderer {
       spec: PrismFaceSpec(label: label, size: size, crop: crop!),
     );
   }
-}
-
-class _PrismFacePlacement {
-  const _PrismFacePlacement({
-    required this.label,
-    required this.center,
-    required this.transform,
-  });
-
-  final String label;
-  final vm.Vector3 center;
-  final Matrix4 transform;
 }

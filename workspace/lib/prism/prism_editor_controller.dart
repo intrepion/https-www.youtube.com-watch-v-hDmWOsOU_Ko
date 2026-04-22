@@ -1,34 +1,33 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
+import 'prism_face_value_store.dart';
 import 'prism_config.dart';
+import 'prism_view_state.dart';
 
 class PrismEditorController extends ChangeNotifier {
-  double rx = 0.0;
-  double ry = 0.0;
-  double rz = 0.0;
-  double zoom = 1.0;
   bool showFaceOverlays = false;
   String selectedImageAssetPath = prismImageAssetPaths.first;
   String selectedFace = 'stem';
 
-  PrismEditorController()
-    : _prismFaceValuesByDimensions = {
-        for (final entry in defaultPrismFaceValuesByDimensions.entries)
-          entry.key: Map<String, Rect>.from(entry.value),
-      };
+  final PrismFaceValueStore _faceValueStore = PrismFaceValueStore();
+  final PrismViewState _viewState = PrismViewState();
 
-  final Map<String, Map<String, Rect>> _prismFaceValuesByDimensions;
+  double get rx => _viewState.rx;
+  double get ry => _viewState.ry;
+  double get rz => _viewState.rz;
+  double get zoom => _viewState.zoom;
 
   PrismImageOption get selectedImageOption => prismImageOptions.firstWhere(
     (option) => option.assetPath == selectedImageAssetPath,
   );
 
   Map<String, Rect> get activePrismFaceValues =>
-      _prismFaceValuesByDimensions[selectedImageOption.dimensions.key]!;
+      _faceValueStore.faceValuesFor(selectedImageOption.dimensions);
 
-  Rect get selectedCrop => activePrismFaceValues[selectedFace]!;
+  Rect get selectedCrop => _faceValueStore.selectedCrop(
+    dimensions: selectedImageOption.dimensions,
+    selectedFace: selectedFace,
+  );
 
   void setImage(String value) {
     if (selectedImageAssetPath == value) return;
@@ -49,35 +48,23 @@ class PrismEditorController extends ChangeNotifier {
   }
 
   void setRx(double value) {
-    if (rx == value) return;
-    rx = value;
-    notifyListeners();
+    if (_viewState.setRx(value)) notifyListeners();
   }
 
   void setRy(double value) {
-    if (ry == value) return;
-    ry = value;
-    notifyListeners();
+    if (_viewState.setRy(value)) notifyListeners();
   }
 
   void setRz(double value) {
-    if (rz == value) return;
-    rz = value;
-    notifyListeners();
+    if (_viewState.setRz(value)) notifyListeners();
   }
 
   void setZoom(double value) {
-    if (zoom == value) return;
-    zoom = value;
-    notifyListeners();
+    if (_viewState.setZoom(value)) notifyListeners();
   }
 
   void rotateByDrag(DragUpdateDetails details) {
-    rx += details.delta.dy * 0.01;
-    ry -= details.delta.dx * 0.01;
-    rx %= pi * 2;
-    ry %= pi * 2;
-    notifyListeners();
+    if (_viewState.rotateByDrag(details)) notifyListeners();
   }
 
   void updateSelectedCrop({
@@ -86,27 +73,17 @@ class PrismEditorController extends ChangeNotifier {
     double? width,
     double? height,
   }) {
-    final prismFaceValues = activePrismFaceValues;
-    final current = prismFaceValues[selectedFace]!;
-    final nextLeft = (left ?? current.left).clamp(0.0, 1.0);
-    final nextTop = (top ?? current.top).clamp(0.0, 1.0);
-    final maxWidth = max(minimumCropExtent, 1.0 - nextLeft);
-    final maxHeight = max(minimumCropExtent, 1.0 - nextTop);
-    final nextWidth = (width ?? current.width).clamp(
-      minimumCropExtent,
-      maxWidth,
-    );
-    final nextHeight = (height ?? current.height).clamp(
-      minimumCropExtent,
-      maxHeight,
-    );
-
-    prismFaceValues[selectedFace] = Rect.fromLTWH(
-      nextLeft,
-      nextTop,
-      nextWidth,
-      nextHeight,
-    );
-    notifyListeners();
+    if (
+      _faceValueStore.updateSelectedCrop(
+        dimensions: selectedImageOption.dimensions,
+        selectedFace: selectedFace,
+        left: left,
+        top: top,
+        width: width,
+        height: height,
+      )
+    ) {
+      notifyListeners();
+    }
   }
 }

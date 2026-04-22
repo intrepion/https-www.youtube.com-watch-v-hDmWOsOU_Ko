@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../prism_editor_controller.dart';
 import '../prism_config.dart';
 import '../controls/prism_controls.dart';
+import 'prism_editor_layout.dart';
 import 'prism_image_panel.dart';
 import 'prism_viewport_panel.dart';
 
@@ -86,33 +87,9 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
           onPanUpdate: _controller.rotateByDrag,
           child: Scaffold(
             body: SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWideLayout = constraints.maxWidth >= 960;
-
-                  if (isWideLayout) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 560),
-                            child: _buildImagePanel(),
-                          ),
-                        ),
-                        const VerticalDivider(width: 1),
-                        Expanded(child: _buildPrismPanel()),
-                      ],
-                    );
-                  }
-
-                  return Column(
-                    children: [
-                      Expanded(child: _buildImagePanel()),
-                      const Divider(height: 1),
-                      Expanded(child: _buildPrismPanel()),
-                    ],
-                  );
-                },
+              child: PrismEditorLayout(
+                imagePanel: _buildImagePanel(),
+                prismPanel: _buildPrismPanel(),
               ),
             ),
           ),
