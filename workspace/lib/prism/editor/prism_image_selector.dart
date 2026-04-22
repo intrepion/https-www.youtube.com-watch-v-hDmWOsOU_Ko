@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../prism_config.dart';
+import '../model/prism_models.dart';
 import 'prism_labeled_field.dart';
 
 class PrismImageSelector extends StatelessWidget {

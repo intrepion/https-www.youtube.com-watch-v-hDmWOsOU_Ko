@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../prism_editor_controller.dart';
-import '../prism_config.dart';
+import '../config/prism_image_catalog.dart';
 import '../controls/prism_face_crop_controls.dart';
 import '../controls/prism_rotation_controls.dart';
+import '../state/prism_editor_controller.dart';
 import 'prism_editor_layout.dart';
 import 'prism_image_panel.dart';
 import 'prism_viewport_panel.dart';

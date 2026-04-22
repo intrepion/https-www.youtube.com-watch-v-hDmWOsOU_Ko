@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../prism_config.dart';
+import '../config/prism_constants.dart';
+import '../model/prism_models.dart';
 import '../preview/asset_ui_image_loader.dart';
 import 'prism_renderer.dart';
 

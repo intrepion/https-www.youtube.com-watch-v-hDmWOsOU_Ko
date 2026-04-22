@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../prism_models.dart';
+import '../model/prism_models.dart';
 
 class PrismFaceSpec {
   const PrismFaceSpec({

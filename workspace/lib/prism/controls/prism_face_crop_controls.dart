@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../prism_config.dart';
+import '../config/prism_constants.dart';
 import 'prism_slider_control.dart';
 
 class PrismFaceCropControls extends StatelessWidget {

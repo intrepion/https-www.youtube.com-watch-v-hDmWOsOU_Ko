@@ -2,7 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../prism_config.dart';
+import '../config/prism_face_presets.dart';
+import '../model/prism_models.dart';
 
 class PrismFaceOverlayPainter extends CustomPainter {
   const PrismFaceOverlayPainter({

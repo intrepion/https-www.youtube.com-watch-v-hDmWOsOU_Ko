@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../prism_config.dart';
+import '../model/prism_models.dart';
 import '../preview/prism_image_preview.dart';
 
 class PrismPreviewCard extends StatelessWidget {

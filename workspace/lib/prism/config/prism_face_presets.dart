@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'prism_models.dart';
+import '../model/prism_models.dart';
 
 const defaultPrismFaceValuesByDimensions = <String, Map<PrismFaceId, Rect>>{
   '165x165x178': {

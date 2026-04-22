@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../prism_config.dart';
+import '../model/prism_models.dart';
 import 'asset_ui_image_loader.dart';
 import 'prism_face_overlay_painter.dart';
 

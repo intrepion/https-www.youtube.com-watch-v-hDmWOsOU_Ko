@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
-import '../prism_config.dart';
+import '../model/prism_models.dart';
 
 class PrismFacePlacement {
   const PrismFacePlacement({

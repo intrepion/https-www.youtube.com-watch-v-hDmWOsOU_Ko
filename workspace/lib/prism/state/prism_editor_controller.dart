@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../config/prism_image_catalog.dart';
+import '../model/prism_models.dart';
 import 'prism_face_value_store.dart';
-import 'prism_config.dart';
 import 'prism_view_state.dart';
 
 class PrismEditorController extends ChangeNotifier {

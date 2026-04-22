@@ -1,4 +1,4 @@
-import 'prism_models.dart';
+import '../model/prism_models.dart';
 
 const prismImageAssetPaths = <String>[
   'assets/scentsy-box-165x165x178-ewok.png',
