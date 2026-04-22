@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../prism_config.dart';
-import 'rectangular_prism.dart';
+import '../renderer/rectangular_prism.dart';
 
 class PrismViewportPanel extends StatelessWidget {
   const PrismViewportPanel({

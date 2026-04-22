@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'prism/widgets/prism_editor_page.dart';
+import 'prism/editor/prism_editor_page.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../prism_config.dart';
-import 'asset_ui_image_loader.dart';
+import '../preview/asset_ui_image_loader.dart';
 import 'prism_renderer.dart';
 
 class RectangularPrism extends StatelessWidget {

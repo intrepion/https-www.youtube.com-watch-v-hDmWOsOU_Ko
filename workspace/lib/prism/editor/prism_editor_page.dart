@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../prism_editor_controller.dart';
 import '../prism_config.dart';
-import 'prism_controls.dart';
+import '../controls/prism_controls.dart';
 import 'prism_image_panel.dart';
 import 'prism_viewport_panel.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../prism_config.dart';
-import 'prism_image_preview.dart';
+import '../preview/prism_image_preview.dart';
 import 'prism_labeled_field.dart';
 
 class PrismImagePanel extends StatelessWidget {
