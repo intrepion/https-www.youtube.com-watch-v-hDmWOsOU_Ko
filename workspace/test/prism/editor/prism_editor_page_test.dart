@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hello_world/prism/config/prism_face_presets.dart';
+import 'package:hello_world/prism/config/prism_image_catalog.dart';
 import 'package:hello_world/prism/controls/prism_rotation_controls.dart';
 import 'package:hello_world/prism/controls/prism_face_crop_controls.dart';
+import 'package:hello_world/prism/editor/prism_face_editor_section.dart';
+import 'package:hello_world/prism/editor/prism_image_panel.dart';
+import 'package:hello_world/prism/editor/prism_image_selector.dart';
 import 'package:hello_world/prism/editor/prism_preview_card.dart';
+import 'package:hello_world/prism/model/prism_models.dart';
 import 'package:hello_world/prism/renderer/rectangular_prism.dart';
 import '../../test_helpers/prism_widget_test_helpers.dart';
 
@@ -143,6 +150,36 @@ void main() {
     expect(rotatedPrism.rx, isNot(zoomedPrism.rx));
   });
 
+  testWidgets('pointer scale signals zoom the prism on trackpads', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    final initialPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+    final center = tester.getCenter(find.byType(RectangularPrism));
+
+    tester.binding.handlePointerEvent(
+      PointerScrollEvent(position: center, scrollDelta: const Offset(0, 20)),
+    );
+    await tester.pump();
+    expect(
+      tester.widget<RectangularPrism>(find.byType(RectangularPrism)).zoom,
+      initialPrism.zoom,
+    );
+
+    tester.binding.handlePointerEvent(
+      PointerScaleEvent(position: center, scale: 1.5),
+    );
+    await tester.pump();
+
+    final zoomedPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+    expect(zoomedPrism.zoom, greaterThan(initialPrism.zoom));
+  });
+
   testWidgets('transform controls toggle hides rotation sliders', (
     WidgetTester tester,
   ) async {
@@ -207,5 +244,93 @@ void main() {
     expect(cropControls.crop.top, closeTo(0.2, 0.0001));
     expect(cropControls.crop.width, closeTo(0.3, 0.0001));
     expect(cropControls.crop.height, closeTo(0.4, 0.0001));
+  });
+
+  testWidgets('image selector ignores null changes and emits selected images', (
+    WidgetTester tester,
+  ) async {
+    final selectedImages = <PrismImageOption>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PrismImageSelector(
+            selectedImageOption: prismImageOptions.first,
+            imageOptions: prismImageOptions,
+            onImageChanged: selectedImages.add,
+          ),
+        ),
+      ),
+    );
+
+    final dropdown = tester.widget<DropdownButton<PrismImageOption>>(
+      find.byKey(const ValueKey('image-dropdown')),
+    );
+    dropdown.onChanged?.call(null);
+    dropdown.onChanged?.call(prismImageOptions.last);
+
+    expect(selectedImages, [prismImageOptions.last]);
+  });
+
+  testWidgets('face editor ignores null face selections', (
+    WidgetTester tester,
+  ) async {
+    final selectedFaces = <PrismFaceId>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PrismFaceEditorSection(
+            selectedFace: PrismFaceId.stem,
+            showFaceOverlays: false,
+            onFaceChanged: selectedFaces.add,
+            onShowFaceOverlaysChanged: (_) {},
+            controls: const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+
+    final dropdown = tester.widget<DropdownButton<PrismFaceId>>(
+      find.byKey(const ValueKey('face-dropdown')),
+    );
+    dropdown.onChanged?.call(null);
+    dropdown.onChanged?.call(PrismFaceId.port);
+
+    expect(selectedFaces, [PrismFaceId.port]);
+  });
+
+  testWidgets('image panel can render as hidden placeholder', (
+    WidgetTester tester,
+  ) async {
+    final imageOption = prismImageOptions.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PrismImagePanel(
+            selectedImageOption: imageOption,
+            prismFaceValues:
+                defaultPrismFaceValuesByDimensions[imageOption.dimensions]!,
+            selectedFace: PrismFaceId.stem,
+            showFaceOverlays: false,
+            showImagePreview: false,
+            faceValuesVersion: 0,
+            onFaceChanged: (_) {},
+            onShowFaceOverlaysChanged: (_) {},
+            faceControls: PrismFaceCropControls(
+              crop: const Rect.fromLTWH(0.1, 0.2, 0.3, 0.4),
+              onLeftChanged: (_) {},
+              onTopChanged: (_) {},
+              onWidthChanged: (_) {},
+              onHeightChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(PrismPreviewCard), findsNothing);
+    expect(find.byType(SizedBox), findsOneWidget);
   });
 }

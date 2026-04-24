@@ -23,7 +23,7 @@ check-formatting:
 check-tests:
 	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter test)
 
-coverage min="90" branch_min="90":
+coverage min="95" branch_min="95":
 	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter test --branch-coverage && bash tool/check_coverage.sh {{min}} {{branch_min}})
 
 check-integration-tests:

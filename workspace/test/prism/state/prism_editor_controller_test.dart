@@ -29,6 +29,7 @@ void main() {
 
     final snapshot = controller.snapshot;
 
+    expect(snapshot.selectedImageAssetPath, prismImageOptions.last.assetPath);
     expect(snapshot.selectedImageOption, prismImageOptions.last);
     expect(snapshot.dimensions, prismImageOptions.last.dimensions);
     expect(

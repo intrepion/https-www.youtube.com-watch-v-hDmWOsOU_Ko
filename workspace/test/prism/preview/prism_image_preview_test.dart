@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hello_world/prism/config/prism_face_presets.dart';
 import 'package:hello_world/prism/config/prism_image_catalog.dart';
 import 'package:hello_world/prism/model/prism_models.dart';
+import 'package:hello_world/prism/preview/asset_ui_image_loader.dart';
 import 'package:hello_world/prism/preview/prism_image_preview.dart';
 
 void main() {
@@ -71,5 +72,35 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Image failed to load'), findsOneWidget);
+  });
+
+  testWidgets('AssetUiImageLoader resolves unchanged and changed asset paths', (
+    WidgetTester tester,
+  ) async {
+    Widget buildLoader(String assetPath) {
+      return MaterialApp(
+        home: AssetUiImageLoader(
+          assetPath: assetPath,
+          builder: (context, state) {
+            return Text(
+              state.isLoading
+                  ? 'loading'
+                  : state.hasError
+                  ? 'error'
+                  : 'loaded',
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildLoader('assets/missing-one.png'));
+    await tester.pump();
+    await tester.pumpWidget(buildLoader('assets/missing-one.png'));
+    await tester.pump();
+    await tester.pumpWidget(buildLoader('assets/missing-two.png'));
+    await tester.pump();
+
+    expect(find.textContaining(RegExp('loading|error')), findsOneWidget);
   });
 }
