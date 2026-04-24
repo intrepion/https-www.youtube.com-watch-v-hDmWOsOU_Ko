@@ -38,7 +38,12 @@ jobs:
         working-directory: workspace
         run: dart format --output=none --set-exit-if-changed lib test integration_test
 
-      - name: Test
+      - name: Test with coverage
         if: ${{ hashFiles('workspace/pubspec.yaml') != '' }}
         working-directory: workspace
-        run: flutter test
+        run: flutter test --coverage
+
+      - name: Check coverage
+        if: ${{ hashFiles('workspace/pubspec.yaml') != '' }}
+        working-directory: workspace
+        run: bash tool/check_coverage.sh 90

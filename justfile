@@ -23,6 +23,9 @@ check-formatting:
 check-tests:
 	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter test)
 
+coverage min="90":
+	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter test --coverage && bash tool/check_coverage.sh {{min}})
+
 check-integration-tests:
 	(cd {{workspace}} && ./tool/ensure_box_asset.sh && flutter drive --driver=test_driver/integration_test.dart --target=integration_test/prism_editor_flow_test.dart -d chrome)
 
