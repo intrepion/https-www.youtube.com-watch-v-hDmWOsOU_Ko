@@ -70,6 +70,7 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
       onImageChanged: _controller.setImage,
       onShowImagePreviewChanged: _controller.setShowImagePreview,
       onShowTransformControlsChanged: _controller.setShowTransformControls,
+      onPrismDragUpdate: _controller.rotateByDrag,
       rotationControls: _buildPrismControls(snapshot),
     );
   }
@@ -86,16 +87,13 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
       animation: _controller,
       builder: (context, _) {
         final snapshot = _controller.snapshot;
-        return GestureDetector(
-          onPanUpdate: _controller.rotateByDrag,
-          child: Scaffold(
-            body: SafeArea(
-              child: PrismEditorLayout(
-                imagePanel: snapshot.showImagePreview
-                    ? _buildImagePanel(snapshot)
-                    : null,
-                prismPanel: _buildPrismPanel(snapshot),
-              ),
+        return Scaffold(
+          body: SafeArea(
+            child: PrismEditorLayout(
+              imagePanel: snapshot.showImagePreview
+                  ? _buildImagePanel(snapshot)
+                  : null,
+              prismPanel: _buildPrismPanel(snapshot),
             ),
           ),
         );

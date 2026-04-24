@@ -59,6 +59,24 @@ void main() {
     expect(find.byType(PrismPreviewCard), findsOneWidget);
   });
 
+  testWidgets('dragging the prism viewport rotates the prism', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    final initialPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+
+    await tester.drag(find.byType(RectangularPrism), const Offset(0, 100));
+    await tester.pump();
+
+    final updatedPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+    expect(updatedPrism.rx, isNot(initialPrism.rx));
+  });
+
   testWidgets('transform controls toggle hides rotation sliders', (
     WidgetTester tester,
   ) async {

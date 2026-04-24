@@ -21,6 +21,7 @@ class PrismViewportPanel extends StatelessWidget {
     required this.onImageChanged,
     required this.onShowImagePreviewChanged,
     required this.onShowTransformControlsChanged,
+    required this.onPrismDragUpdate,
     required this.rotationControls,
   });
 
@@ -36,71 +37,58 @@ class PrismViewportPanel extends StatelessWidget {
   final ValueChanged<PrismImageOption> onImageChanged;
   final ValueChanged<bool> onShowImagePreviewChanged;
   final ValueChanged<bool> onShowTransformControlsChanged;
+  final GestureDragUpdateCallback onPrismDragUpdate;
   final PrismRotationControls rotationControls;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, panelConstraints) {
-        final prismHeight =
-            (panelConstraints.maxHeight * prismViewportHeightFactor).clamp(
-              prismViewportMinHeight,
-              prismViewportMaxHeight,
-            );
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            0,
-            prismEditorPanelTopPadding,
-            0,
-            prismEditorPanelBottomPadding,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        0,
+        prismEditorPanelTopPadding,
+        0,
+        prismEditorPanelBottomPadding,
+      ),
+      child: Column(
+        children: [
+          _ViewportToolbar(
+            selectedImageOption: imageOption,
+            imageOptions: imageOptions,
+            showImagePreview: showImagePreview,
+            showTransformControls: showTransformControls,
+            onImageChanged: onImageChanged,
+            onShowImagePreviewChanged: onShowImagePreviewChanged,
+            onShowTransformControlsChanged: onShowTransformControlsChanged,
           ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: panelConstraints.maxHeight),
-            child: Column(
-              children: [
-                _ViewportToolbar(
-                  selectedImageOption: imageOption,
-                  imageOptions: imageOptions,
-                  showImagePreview: showImagePreview,
-                  showTransformControls: showTransformControls,
-                  onImageChanged: onImageChanged,
-                  onShowImagePreviewChanged: onShowImagePreviewChanged,
-                  onShowTransformControlsChanged:
-                      onShowTransformControlsChanged,
-                ),
-                const SizedBox(height: prismViewportSectionSpacing),
-                SizedBox(
-                  width: double.infinity,
-                  height: prismHeight,
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Padding(
-                        padding: const EdgeInsets.all(
-                          prismViewportInnerPadding,
-                        ),
-                        child: RectangularPrism(
-                          rx: rx,
-                          ry: ry,
-                          rz: rz,
-                          zoom: zoom,
-                          imageOption: imageOption,
-                          prismFaceValues: prismFaceValues,
-                        ),
-                      ),
+          const SizedBox(height: prismViewportSectionSpacing),
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanUpdate: onPrismDragUpdate,
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Padding(
+                    padding: const EdgeInsets.all(prismViewportInnerPadding),
+                    child: RectangularPrism(
+                      rx: rx,
+                      ry: ry,
+                      rz: rz,
+                      zoom: zoom,
+                      imageOption: imageOption,
+                      prismFaceValues: prismFaceValues,
                     ),
                   ),
                 ),
-                if (showTransformControls) ...[
-                  const SizedBox(height: prismViewportSectionSpacing),
-                  rotationControls,
-                ],
-              ],
+              ),
             ),
           ),
-        );
-      },
+          if (showTransformControls) ...[
+            const SizedBox(height: prismViewportSectionSpacing),
+            Flexible(child: SingleChildScrollView(child: rotationControls)),
+          ],
+        ],
+      ),
     );
   }
 }
