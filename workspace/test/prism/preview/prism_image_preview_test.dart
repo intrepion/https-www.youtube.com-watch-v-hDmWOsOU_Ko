@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hello_world/prism/config/prism_face_presets.dart';
@@ -103,4 +104,52 @@ void main() {
 
     expect(find.textContaining(RegExp('loading|error')), findsOneWidget);
   });
+
+  testWidgets('AssetUiImageLoader renders loaded images', (
+    WidgetTester tester,
+  ) async {
+    final imageProvider = _TestImageProvider(image);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AssetUiImageLoader(
+          assetPath: 'memory-image.png',
+          imageProviderBuilder: (_) => imageProvider,
+          builder: (context, state) {
+            return Text(
+              state.isLoading
+                  ? 'loading'
+                  : state.hasError
+                  ? 'error'
+                  : 'loaded',
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('loaded'), findsOneWidget);
+  });
+}
+
+class _TestImageProvider extends ImageProvider<_TestImageProvider> {
+  const _TestImageProvider(this.image);
+
+  final ui.Image image;
+
+  @override
+  Future<_TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(
+    _TestImageProvider key,
+    ImageDecoderCallback decode,
+  ) {
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
+    );
+  }
 }

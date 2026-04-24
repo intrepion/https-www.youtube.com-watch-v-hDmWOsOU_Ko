@@ -2,6 +2,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+typedef ImageProviderBuilder = ImageProvider<Object> Function(String assetPath);
+
+ImageProvider<Object> _assetImageProviderBuilder(String assetPath) {
+  return AssetImage(assetPath);
+}
+
 class AssetUiImageLoadState {
   const AssetUiImageLoadState({
     required this.image,
@@ -22,11 +28,13 @@ class AssetUiImageLoader extends StatefulWidget {
     super.key,
     required this.assetPath,
     required this.builder,
+    this.imageProviderBuilder = _assetImageProviderBuilder,
   });
 
   final String assetPath;
   final Widget Function(BuildContext context, AssetUiImageLoadState state)
   builder;
+  final ImageProviderBuilder imageProviderBuilder;
 
   @override
   State<AssetUiImageLoader> createState() => _AssetUiImageLoaderState();
@@ -71,9 +79,9 @@ class _AssetUiImageLoaderState extends State<AssetUiImageLoader> {
   }
 
   void _resolveImage() {
-    final stream = AssetImage(
-      widget.assetPath,
-    ).resolve(createLocalImageConfiguration(context));
+    final stream = widget
+        .imageProviderBuilder(widget.assetPath)
+        .resolve(createLocalImageConfiguration(context));
 
     if (_imageStream?.key == stream.key) return;
 
