@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+const prismMinZoom = 0.4;
+const prismMaxZoom = 2.5;
+
 class PrismViewState {
   double rx = 0.0;
   double ry = 0.0;
@@ -27,14 +30,19 @@ class PrismViewState {
   }
 
   bool setZoom(double value) {
-    if (zoom == value) return false;
-    zoom = value;
+    final nextZoom = value.clamp(prismMinZoom, prismMaxZoom);
+    if (zoom == nextZoom) return false;
+    zoom = nextZoom;
     return true;
   }
 
   bool rotateByDrag(DragUpdateDetails details) {
-    final nextRx = (rx + details.delta.dy * 0.01) % (pi * 2);
-    final nextRy = (ry - details.delta.dx * 0.01) % (pi * 2);
+    return rotateByDelta(details.delta);
+  }
+
+  bool rotateByDelta(Offset delta) {
+    final nextRx = (rx + delta.dy * 0.01) % (pi * 2);
+    final nextRy = (ry - delta.dx * 0.01) % (pi * 2);
     if (rx == nextRx && ry == nextRy) return false;
     rx = nextRx;
     ry = nextRy;

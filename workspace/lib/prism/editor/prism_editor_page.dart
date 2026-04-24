@@ -70,7 +70,9 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
       onImageChanged: _controller.setImage,
       onShowImagePreviewChanged: _controller.setShowImagePreview,
       onShowTransformControlsChanged: _controller.setShowTransformControls,
-      onPrismDragUpdate: _controller.rotateByDrag,
+      onPrismRotateDelta: _controller.rotateByDelta,
+      onPrismScaleStart: _controller.startZoomGesture,
+      onPrismScaleUpdate: _controller.scaleZoom,
       rotationControls: _buildPrismControls(snapshot),
     );
   }

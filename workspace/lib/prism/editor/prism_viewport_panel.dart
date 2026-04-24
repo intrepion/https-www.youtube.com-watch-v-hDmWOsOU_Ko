@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../controls/prism_rotation_controls.dart';
@@ -6,7 +7,7 @@ import '../renderer/rectangular_prism.dart';
 import 'prism_editor_constants.dart';
 import 'prism_image_selector.dart';
 
-class PrismViewportPanel extends StatelessWidget {
+class PrismViewportPanel extends StatefulWidget {
   const PrismViewportPanel({
     super.key,
     required this.rx,
@@ -21,7 +22,9 @@ class PrismViewportPanel extends StatelessWidget {
     required this.onImageChanged,
     required this.onShowImagePreviewChanged,
     required this.onShowTransformControlsChanged,
-    required this.onPrismDragUpdate,
+    required this.onPrismRotateDelta,
+    required this.onPrismScaleStart,
+    required this.onPrismScaleUpdate,
     required this.rotationControls,
   });
 
@@ -37,8 +40,44 @@ class PrismViewportPanel extends StatelessWidget {
   final ValueChanged<PrismImageOption> onImageChanged;
   final ValueChanged<bool> onShowImagePreviewChanged;
   final ValueChanged<bool> onShowTransformControlsChanged;
-  final GestureDragUpdateCallback onPrismDragUpdate;
+  final ValueChanged<Offset> onPrismRotateDelta;
+  final VoidCallback onPrismScaleStart;
+  final ValueChanged<double> onPrismScaleUpdate;
   final PrismRotationControls rotationControls;
+
+  @override
+  State<PrismViewportPanel> createState() => _PrismViewportPanelState();
+}
+
+class _PrismViewportPanelState extends State<PrismViewportPanel> {
+  bool _gestureUsedZoom = false;
+
+  void _handlePointerSignal(PointerSignalEvent event) {
+    if (event is! PointerScaleEvent) return;
+    widget.onPrismScaleStart();
+    widget.onPrismScaleUpdate(event.scale);
+  }
+
+  void _handleScaleStart(ScaleStartDetails details) {
+    _gestureUsedZoom = false;
+    widget.onPrismScaleStart();
+  }
+
+  void _handleScaleUpdate(ScaleUpdateDetails details) {
+    final isZooming = details.pointerCount >= 2 || details.scale != 1.0;
+    if (isZooming) {
+      _gestureUsedZoom = true;
+      widget.onPrismScaleUpdate(details.scale);
+      return;
+    }
+
+    if (_gestureUsedZoom) return;
+    widget.onPrismRotateDelta(details.focalPointDelta);
+  }
+
+  void _handleScaleEnd(ScaleEndDetails details) {
+    _gestureUsedZoom = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,40 +91,48 @@ class PrismViewportPanel extends StatelessWidget {
       child: Column(
         children: [
           _ViewportToolbar(
-            selectedImageOption: imageOption,
-            imageOptions: imageOptions,
-            showImagePreview: showImagePreview,
-            showTransformControls: showTransformControls,
-            onImageChanged: onImageChanged,
-            onShowImagePreviewChanged: onShowImagePreviewChanged,
-            onShowTransformControlsChanged: onShowTransformControlsChanged,
+            selectedImageOption: widget.imageOption,
+            imageOptions: widget.imageOptions,
+            showImagePreview: widget.showImagePreview,
+            showTransformControls: widget.showTransformControls,
+            onImageChanged: widget.onImageChanged,
+            onShowImagePreviewChanged: widget.onShowImagePreviewChanged,
+            onShowTransformControlsChanged:
+                widget.onShowTransformControlsChanged,
           ),
           const SizedBox(height: prismViewportSectionSpacing),
           Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onPanUpdate: onPrismDragUpdate,
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Padding(
-                    padding: const EdgeInsets.all(prismViewportInnerPadding),
-                    child: RectangularPrism(
-                      rx: rx,
-                      ry: ry,
-                      rz: rz,
-                      zoom: zoom,
-                      imageOption: imageOption,
-                      prismFaceValues: prismFaceValues,
+            child: Listener(
+              onPointerSignal: _handlePointerSignal,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+                onScaleEnd: _handleScaleEnd,
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Padding(
+                      padding: const EdgeInsets.all(prismViewportInnerPadding),
+                      child: RectangularPrism(
+                        rx: widget.rx,
+                        ry: widget.ry,
+                        rz: widget.rz,
+                        zoom: widget.zoom,
+                        imageOption: widget.imageOption,
+                        prismFaceValues: widget.prismFaceValues,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-          if (showTransformControls) ...[
+          if (widget.showTransformControls) ...[
             const SizedBox(height: prismViewportSectionSpacing),
-            Flexible(child: SingleChildScrollView(child: rotationControls)),
+            Flexible(
+              child: SingleChildScrollView(child: widget.rotationControls),
+            ),
           ],
         ],
       ),

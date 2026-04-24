@@ -77,6 +77,72 @@ void main() {
     expect(updatedPrism.rx, isNot(initialPrism.rx));
   });
 
+  testWidgets('pinching the prism viewport updates zoom', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    final initialPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+    final center = tester.getCenter(find.byType(RectangularPrism));
+    final firstFinger = await tester.startGesture(
+      center.translate(-20, 0),
+      pointer: 1,
+    );
+    final secondFinger = await tester.startGesture(
+      center.translate(20, 0),
+      pointer: 2,
+    );
+
+    await firstFinger.moveTo(center.translate(-80, 0));
+    await secondFinger.moveTo(center.translate(80, 0));
+    await tester.pump();
+    await firstFinger.up();
+    await secondFinger.up();
+    await tester.pump();
+
+    final updatedPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+    expect(updatedPrism.zoom, greaterThan(initialPrism.zoom));
+  });
+
+  testWidgets('dragging still rotates the prism after pinching', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    final center = tester.getCenter(find.byType(RectangularPrism));
+    final firstFinger = await tester.startGesture(
+      center.translate(-20, 0),
+      pointer: 1,
+    );
+    final secondFinger = await tester.startGesture(
+      center.translate(20, 0),
+      pointer: 2,
+    );
+
+    await firstFinger.moveTo(center.translate(-80, 0));
+    await secondFinger.moveTo(center.translate(80, 0));
+    await tester.pump();
+    await firstFinger.up();
+    await secondFinger.up();
+    await tester.pump();
+
+    final zoomedPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+
+    await tester.drag(find.byType(RectangularPrism), const Offset(0, 100));
+    await tester.pump();
+
+    final rotatedPrism = tester.widget<RectangularPrism>(
+      find.byType(RectangularPrism),
+    );
+    expect(rotatedPrism.rx, isNot(zoomedPrism.rx));
+  });
+
   testWidgets('transform controls toggle hides rotation sliders', (
     WidgetTester tester,
   ) async {

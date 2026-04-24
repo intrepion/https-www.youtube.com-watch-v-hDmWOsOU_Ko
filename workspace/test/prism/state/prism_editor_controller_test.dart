@@ -43,4 +43,15 @@ void main() {
 
     expect(controller.snapshot.selectedFace, PrismFaceId.port);
   });
+
+  test('scaleZoom changes zoom relative to gesture start', () {
+    final controller = PrismEditorController();
+
+    controller
+      ..setZoom(1.5)
+      ..startZoomGesture()
+      ..scaleZoom(1.5);
+
+    expect(controller.snapshot.zoom, closeTo(2.25, 0.0001));
+  });
 }

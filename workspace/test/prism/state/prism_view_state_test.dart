@@ -25,4 +25,14 @@ void main() {
     expect(state.setRz(0.0), isFalse);
     expect(state.setZoom(1.0), isFalse);
   });
+
+  test('setZoom clamps to supported zoom bounds', () {
+    final state = PrismViewState();
+
+    expect(state.setZoom(10.0), isTrue);
+    expect(state.zoom, prismMaxZoom);
+
+    expect(state.setZoom(0.1), isTrue);
+    expect(state.zoom, prismMinZoom);
+  });
 }

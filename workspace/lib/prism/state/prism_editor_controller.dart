@@ -15,6 +15,7 @@ class PrismEditorController extends ChangeNotifier {
 
   final PrismFaceValueStore _faceValueStore = PrismFaceValueStore();
   final PrismViewState _viewState = PrismViewState();
+  double _gestureStartZoom = 1.0;
 
   PrismEditorSnapshot get snapshot => _buildSnapshot();
 
@@ -94,8 +95,20 @@ class PrismEditorController extends ChangeNotifier {
     _notifyIfChanged(_viewState.setZoom(value));
   }
 
+  void startZoomGesture() {
+    _gestureStartZoom = _viewState.zoom;
+  }
+
+  void scaleZoom(double scale) {
+    _notifyIfChanged(_viewState.setZoom(_gestureStartZoom * scale));
+  }
+
   void rotateByDrag(DragUpdateDetails details) {
     _notifyIfChanged(_viewState.rotateByDrag(details));
+  }
+
+  void rotateByDelta(Offset delta) {
+    _notifyIfChanged(_viewState.rotateByDelta(delta));
   }
 
   void updateSelectedCrop({

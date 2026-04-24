@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../state/prism_view_state.dart';
 import 'prism_slider_control.dart';
 
 class PrismRotationControls extends StatelessWidget {
@@ -58,8 +59,8 @@ class PrismRotationControls extends StatelessWidget {
           label: 'Zoom',
           valueText: _formatZoom(zoom),
           value: zoom,
-          min: 0.4,
-          max: 2.5,
+          min: prismMinZoom,
+          max: prismMaxZoom,
           onChanged: onZoomChanged,
         ),
       ],
