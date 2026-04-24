@@ -46,4 +46,4 @@ jobs:
       - name: Check coverage
         if: ${{ hashFiles('workspace/pubspec.yaml') != '' }}
         working-directory: workspace
-        run: bash tool/check_coverage.sh 96 96
+        run: bash tool/check_coverage.sh 97 97

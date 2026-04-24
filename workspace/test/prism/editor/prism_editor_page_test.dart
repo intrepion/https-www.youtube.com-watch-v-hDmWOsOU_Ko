@@ -5,6 +5,7 @@ import 'package:hello_world/prism/config/prism_face_presets.dart';
 import 'package:hello_world/prism/config/prism_image_catalog.dart';
 import 'package:hello_world/prism/controls/prism_rotation_controls.dart';
 import 'package:hello_world/prism/controls/prism_face_crop_controls.dart';
+import 'package:hello_world/prism/editor/prism_editor_layout.dart';
 import 'package:hello_world/prism/editor/prism_face_editor_section.dart';
 import 'package:hello_world/prism/editor/prism_image_panel.dart';
 import 'package:hello_world/prism/editor/prism_image_selector.dart';
@@ -64,6 +65,29 @@ void main() {
     expect(find.byType(VerticalDivider), findsOneWidget);
     expect(find.byType(RectangularPrism), findsOneWidget);
     expect(find.byType(PrismPreviewCard), findsOneWidget);
+  });
+
+  testWidgets('editor layout stacks panels on narrow screens', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(800, 600);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: PrismEditorLayout(
+          prismPanel: Text('Prism panel'),
+          imagePanel: Text('Image panel'),
+        ),
+      ),
+    );
+
+    expect(find.byType(Column), findsOneWidget);
+    expect(find.byType(Row), findsNothing);
+    expect(find.text('Prism panel'), findsOneWidget);
+    expect(find.text('Image panel'), findsOneWidget);
   });
 
   testWidgets('dragging the prism viewport rotates the prism', (

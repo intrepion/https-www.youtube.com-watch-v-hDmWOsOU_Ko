@@ -110,10 +110,10 @@ void main() {
   ) async {
     final imageProvider = _TestImageProvider(image);
 
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildLoader(String assetPath) {
+      return MaterialApp(
         home: AssetUiImageLoader(
-          assetPath: 'memory-image.png',
+          assetPath: assetPath,
           imageProviderBuilder: (_) => imageProvider,
           builder: (context, state) {
             return Text(
@@ -125,8 +125,15 @@ void main() {
             );
           },
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildLoader('memory-image.png'));
+    await tester.pump();
+
+    expect(find.text('loaded'), findsOneWidget);
+
+    await tester.pumpWidget(buildLoader('same-resolved-key.png'));
     await tester.pump();
 
     expect(find.text('loaded'), findsOneWidget);
