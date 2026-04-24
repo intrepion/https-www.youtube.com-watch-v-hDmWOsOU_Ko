@@ -17,6 +17,12 @@ void main() {
     expect(state.ry, closeTo((pi * 2) - 0.1, 0.0001));
   });
 
+  test('rotateByDelta reports false when rotation is unchanged', () {
+    final state = PrismViewState();
+
+    expect(state.rotateByDelta(Offset.zero), isFalse);
+  });
+
   test('setters report false when value is unchanged', () {
     final state = PrismViewState();
 

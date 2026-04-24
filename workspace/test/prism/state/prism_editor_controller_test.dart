@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:hello_world/prism/config/prism_image_catalog.dart';
 import 'package:hello_world/prism/model/prism_models.dart';
 import 'package:hello_world/prism/state/prism_editor_controller.dart';
@@ -53,5 +54,45 @@ void main() {
       ..scaleZoom(1.5);
 
     expect(controller.snapshot.zoom, closeTo(2.25, 0.0001));
+  });
+
+  test('unchanged values do not notify listeners', () {
+    final controller = PrismEditorController();
+    var notifyCount = 0;
+    controller.addListener(() => notifyCount += 1);
+
+    controller
+      ..setImage(controller.snapshot.selectedImageOption)
+      ..setFace(controller.snapshot.selectedFace)
+      ..setShowFaceOverlays(controller.snapshot.showFaceOverlays)
+      ..setShowImagePreview(controller.snapshot.showImagePreview)
+      ..setShowTransformControls(controller.snapshot.showTransformControls)
+      ..setRx(controller.snapshot.rx)
+      ..setRy(controller.snapshot.ry)
+      ..setRz(controller.snapshot.rz)
+      ..setZoom(controller.snapshot.zoom)
+      ..scaleZoom(1.0)
+      ..rotateByDelta(Offset.zero)
+      ..updateSelectedCrop();
+
+    expect(notifyCount, 0);
+  });
+
+  test('rotation and crop changes notify listeners', () {
+    final controller = PrismEditorController();
+    var notifyCount = 0;
+    controller.addListener(() => notifyCount += 1);
+
+    controller
+      ..rotateByDrag(
+        DragUpdateDetails(
+          globalPosition: Offset.zero,
+          delta: const Offset(4, 2),
+        ),
+      )
+      ..rotateByDelta(const Offset(2, 4))
+      ..updateSelectedCrop(left: 0.2);
+
+    expect(notifyCount, 3);
   });
 }

@@ -184,4 +184,28 @@ void main() {
     expect(cropControls.crop.left, closeTo(0.4796, 0.0001));
     expect(find.textContaining('Left: 0.4796'), findsOneWidget);
   });
+
+  testWidgets('face crop sliders update all crop dimensions', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    await tester.tap(find.byKey(const ValueKey('show-image-preview-switch')));
+    await tester.pump();
+
+    final sliders = tester.widgetList<Slider>(find.byType(Slider)).toList();
+    sliders[0].onChanged?.call(0.1);
+    sliders[1].onChanged?.call(0.2);
+    sliders[2].onChanged?.call(0.3);
+    sliders[3].onChanged?.call(0.4);
+    await tester.pump();
+
+    final cropControls = tester.widget<PrismFaceCropControls>(
+      find.byType(PrismFaceCropControls),
+    );
+    expect(cropControls.crop.left, closeTo(0.1, 0.0001));
+    expect(cropControls.crop.top, closeTo(0.2, 0.0001));
+    expect(cropControls.crop.width, closeTo(0.3, 0.0001));
+    expect(cropControls.crop.height, closeTo(0.4, 0.0001));
+  });
 }
