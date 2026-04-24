@@ -4,6 +4,13 @@ import 'package:hello_world/prism/model/prism_models.dart';
 import 'package:hello_world/prism/state/prism_editor_controller.dart';
 
 void main() {
+  test('visibility toggles default to hiding optional panels', () {
+    final controller = PrismEditorController();
+
+    expect(controller.snapshot.showImagePreview, isFalse);
+    expect(controller.snapshot.showTransformControls, isFalse);
+  });
+
   test('setImage updates the selected option with a typed image value', () {
     final controller = PrismEditorController();
 

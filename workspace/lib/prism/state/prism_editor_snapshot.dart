@@ -7,6 +7,8 @@ class PrismEditorSnapshot {
     required this.selectedImageOption,
     required this.selectedFace,
     required this.showFaceOverlays,
+    required this.showImagePreview,
+    required this.showTransformControls,
     required this.cropVersion,
     required this.rx,
     required this.ry,
@@ -19,6 +21,8 @@ class PrismEditorSnapshot {
   final PrismImageOption selectedImageOption;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
+  final bool showImagePreview;
+  final bool showTransformControls;
   final int cropVersion;
   final double rx;
   final double ry;

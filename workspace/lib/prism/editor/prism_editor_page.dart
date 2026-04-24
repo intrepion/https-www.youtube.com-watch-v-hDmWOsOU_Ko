@@ -45,12 +45,11 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
   Widget _buildImagePanel(PrismEditorSnapshot snapshot) {
     return PrismImagePanel(
       selectedImageOption: snapshot.selectedImageOption,
-      imageOptions: prismImageOptions,
       prismFaceValues: snapshot.activePrismFaceValues,
       selectedFace: snapshot.selectedFace,
       showFaceOverlays: snapshot.showFaceOverlays,
+      showImagePreview: snapshot.showImagePreview,
       faceValuesVersion: snapshot.cropVersion,
-      onImageChanged: _controller.setImage,
       onFaceChanged: _controller.setFace,
       onShowFaceOverlaysChanged: _controller.setShowFaceOverlays,
       faceControls: _buildFaceControls(snapshot),
@@ -64,7 +63,13 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
       rz: snapshot.rz,
       zoom: snapshot.zoom,
       imageOption: snapshot.selectedImageOption,
+      imageOptions: prismImageOptions,
       prismFaceValues: snapshot.activePrismFaceValues,
+      showImagePreview: snapshot.showImagePreview,
+      showTransformControls: snapshot.showTransformControls,
+      onImageChanged: _controller.setImage,
+      onShowImagePreviewChanged: _controller.setShowImagePreview,
+      onShowTransformControlsChanged: _controller.setShowTransformControls,
       rotationControls: _buildPrismControls(snapshot),
     );
   }
@@ -86,7 +91,9 @@ class _PrismEditorPageState extends State<PrismEditorPage> {
           child: Scaffold(
             body: SafeArea(
               child: PrismEditorLayout(
-                imagePanel: _buildImagePanel(snapshot),
+                imagePanel: snapshot.showImagePreview
+                    ? _buildImagePanel(snapshot)
+                    : null,
                 prismPanel: _buildPrismPanel(snapshot),
               ),
             ),

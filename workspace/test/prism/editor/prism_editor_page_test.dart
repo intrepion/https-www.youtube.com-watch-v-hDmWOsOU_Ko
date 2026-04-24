@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hello_world/prism/controls/prism_rotation_controls.dart';
 import 'package:hello_world/prism/controls/prism_face_crop_controls.dart';
 import 'package:hello_world/prism/editor/prism_preview_card.dart';
+import 'package:hello_world/prism/renderer/rectangular_prism.dart';
 import '../../test_helpers/prism_widget_test_helpers.dart';
 
 void main() {
@@ -9,6 +11,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await pumpPrismEditor(tester);
+
+    await tester.tap(find.byKey(const ValueKey('show-image-preview-switch')));
+    await tester.pump();
 
     var previewCard = tester.widget<PrismPreviewCard>(
       find.byType(PrismPreviewCard),
@@ -24,10 +29,59 @@ void main() {
     expect(previewCard.showFaceOverlays, isTrue);
   });
 
+  testWidgets('image preview toggle hides the preview card', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    expect(find.byType(PrismPreviewCard), findsNothing);
+    expect(find.byType(PrismFaceCropControls), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('show-image-preview-switch')));
+    await tester.pump();
+
+    expect(find.byType(PrismPreviewCard), findsOneWidget);
+    expect(find.byType(PrismFaceCropControls), findsOneWidget);
+  });
+
+  testWidgets('2D panel is removed until image preview is enabled', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    expect(find.byType(VerticalDivider), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('show-image-preview-switch')));
+    await tester.pump();
+
+    expect(find.byType(VerticalDivider), findsOneWidget);
+    expect(find.byType(RectangularPrism), findsOneWidget);
+    expect(find.byType(PrismPreviewCard), findsOneWidget);
+  });
+
+  testWidgets('transform controls toggle hides rotation sliders', (
+    WidgetTester tester,
+  ) async {
+    await pumpPrismEditor(tester);
+
+    expect(find.byType(PrismRotationControls), findsNothing);
+
+    await tester.tap(
+      find.byKey(const ValueKey('show-transform-controls-switch')),
+    );
+    await tester.pump();
+
+    expect(find.byType(PrismRotationControls), findsOneWidget);
+    expect(find.byType(PrismPreviewCard), findsNothing);
+  });
+
   testWidgets('face dropdown switches the active crop controls', (
     WidgetTester tester,
   ) async {
     await pumpPrismEditor(tester);
+
+    await tester.tap(find.byKey(const ValueKey('show-image-preview-switch')));
+    await tester.pump();
 
     var cropControls = tester.widget<PrismFaceCropControls>(
       find.byType(PrismFaceCropControls),

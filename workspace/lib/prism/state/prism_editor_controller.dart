@@ -8,6 +8,8 @@ import 'prism_view_state.dart';
 
 class PrismEditorController extends ChangeNotifier {
   bool _showFaceOverlays = false;
+  bool _showImagePreview = false;
+  bool _showTransformControls = false;
   PrismImageOption _selectedImageOption = _initialSelectedImageOption();
   PrismFaceId _selectedFace = PrismFaceId.stem;
 
@@ -20,6 +22,8 @@ class PrismEditorController extends ChangeNotifier {
     selectedImageOption: _selectedImageOption,
     selectedFace: _selectedFace,
     showFaceOverlays: _showFaceOverlays,
+    showImagePreview: _showImagePreview,
+    showTransformControls: _showTransformControls,
     cropVersion: _faceValueStore.version,
     rx: _viewState.rx,
     ry: _viewState.ry,
@@ -59,6 +63,18 @@ class PrismEditorController extends ChangeNotifier {
   void setShowFaceOverlays(bool value) {
     _setValue(_showFaceOverlays, value, (next) {
       _showFaceOverlays = next;
+    });
+  }
+
+  void setShowImagePreview(bool value) {
+    _setValue(_showImagePreview, value, (next) {
+      _showImagePreview = next;
+    });
+  }
+
+  void setShowTransformControls(bool value) {
+    _setValue(_showTransformControls, value, (next) {
+      _showTransformControls = next;
     });
   }
 

@@ -4,37 +4,38 @@ import '../controls/prism_face_crop_controls.dart';
 import '../model/prism_models.dart';
 import 'prism_editor_constants.dart';
 import 'prism_face_editor_section.dart';
-import 'prism_image_selector.dart';
 import 'prism_preview_card.dart';
 
 class PrismImagePanel extends StatelessWidget {
   const PrismImagePanel({
     super.key,
     required this.selectedImageOption,
-    required this.imageOptions,
     required this.prismFaceValues,
     required this.selectedFace,
     required this.showFaceOverlays,
+    required this.showImagePreview,
     required this.faceValuesVersion,
-    required this.onImageChanged,
     required this.onFaceChanged,
     required this.onShowFaceOverlaysChanged,
     required this.faceControls,
   });
 
   final PrismImageOption selectedImageOption;
-  final List<PrismImageOption> imageOptions;
   final Map<PrismFaceId, Rect> prismFaceValues;
   final PrismFaceId selectedFace;
   final bool showFaceOverlays;
+  final bool showImagePreview;
   final int faceValuesVersion;
-  final ValueChanged<PrismImageOption> onImageChanged;
   final ValueChanged<PrismFaceId> onFaceChanged;
   final ValueChanged<bool> onShowFaceOverlaysChanged;
   final PrismFaceCropControls faceControls;
 
   @override
   Widget build(BuildContext context) {
+    if (!showImagePreview) {
+      return const SizedBox.shrink();
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         0,
@@ -44,12 +45,6 @@ class PrismImagePanel extends StatelessWidget {
       ),
       child: Column(
         children: [
-          PrismImageSelector(
-            selectedImageOption: selectedImageOption,
-            imageOptions: imageOptions,
-            onImageChanged: onImageChanged,
-          ),
-          const SizedBox(height: prismEditorSectionSpacing),
           PrismPreviewCard(
             imageOption: selectedImageOption,
             prismFaceValues: prismFaceValues,
